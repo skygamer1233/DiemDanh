@@ -178,7 +178,7 @@ public class DiemDanh extends JavaPlugin implements Listener {
         }
         List<?> dayEntries = new ArrayList<>(daysSection.getValues(false).values());
 
-        // Tạo các ô ngày lễ
+     
         for (String specialDayKey : getConfig().getConfigurationSection("SpecialDay").getKeys(false)) {
             ConfigurationSection specialDaySection = getConfig().getConfigurationSection("SpecialDay." + specialDayKey);
             int specialDayDate = specialDaySection.getInt("Require.Date"); 
@@ -535,10 +535,10 @@ public class DiemDanh extends JavaPlugin implements Listener {
             int specialDayDate = specialDaySection.getInt("Date");
             int specialDayMonth = specialDaySection.getInt("Month");
 
-            // Kiểm tra giá trị tháng có hợp lệ không
+            
             if (specialDayMonth < 1 || specialDayMonth > 12) {
                 getLogger().warning("Invalid month for special day: " + key);
-                continue; // Bỏ qua ngày lễ nếu tháng không hợp lệ
+                continue; 
             }
 
             if (day == specialDayDate && today.getMonthValue() == specialDayMonth) {
@@ -557,7 +557,7 @@ public class DiemDanh extends JavaPlugin implements Listener {
         
         if (specialDayMonth < 1 || specialDayMonth > 12) {
             getLogger().warning("Invalid month for special day: " + specialDayKey);
-            return "NgayDiemDanh"; // Trả về "NgayDiemDanh" nếu tháng không hợp lệ
+            return "NgayDiemDanh"; 
         }
 
         if (lastCheckInDate.getYear() == LocalDate.now().getYear() &&
