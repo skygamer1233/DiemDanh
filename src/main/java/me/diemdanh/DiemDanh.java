@@ -99,7 +99,7 @@ public class DiemDanh extends JavaPlugin implements Listener {
                     configFile = new File(getDataFolder(), "config.yml");
                 }
                 try {
-                    getConfig().load(configFile); // Tải lại config từ file
+                    getConfig().load(configFile); 
                 } catch (IOException | InvalidConfigurationException e) {
                     player.sendMessage(color.transalate("&cLỗi khi tải lại config!"));
                     e.printStackTrace();
@@ -326,7 +326,7 @@ public class DiemDanh extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        if (!event.getView().getTitle().equals(guiTitle)) return; // Kiểm tra title GUI
+        if (!event.getView().getTitle().equals(guiTitle)) return; 
         if (!(event.getWhoClicked() instanceof Player)) {
             event.getWhoClicked().sendMessage(notPlayerMessage);
             return;
@@ -399,7 +399,7 @@ public class DiemDanh extends JavaPlugin implements Listener {
                     player.sendMessage(ngayDiemDanhMessage.replace("%day%", String.valueOf(day)));
                 }
             }
-        } else if (slot >= 36 && slot <= 38) { // Xử lý tích lũy (ô 36-38)
+        } else if (slot >= 36 && slot <= 38) { 
             int daysRequired = (slot - 36 + 1) * 7;
 
             
@@ -531,7 +531,7 @@ public class DiemDanh extends JavaPlugin implements Listener {
     }
     private String getSpecialDayKey(LocalDate today, int day) {
         for (String key : getConfig().getConfigurationSection("SpecialDay").getKeys(false)) {
-            ConfigurationSection specialDaySection = getConfig().getConfigurationSection("SpecialDay." + key + ".Require"); // Thêm .Require vào đường dẫn
+            ConfigurationSection specialDaySection = getConfig().getConfigurationSection("SpecialDay." + key + ".Require"); 
             int specialDayDate = specialDaySection.getInt("Date");
             int specialDayMonth = specialDaySection.getInt("Month");
 
