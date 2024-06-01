@@ -1,0 +1,419 @@
+Title: "&a&lĐiểm Danh Tháng <month>" # Title của GUI
+Item:
+  NgayDiemDanh:  # Icon khi chưa tới ngày điểm danh
+    ID: GRAY_STAINED_GLASS_PANE
+    Data: 0
+    Name: "&7&l<date>"
+    Glow: false
+  DiemDanh:       # Icon khi tới ngày điểm danh
+    ID: YELLOW_STAINED_GLASS_PANE
+    Data: 0
+    Name: "&e&l<date> Điểm Danh"
+    Glow: true
+  ChuaDiemDanh:   # Icon khi bỏ điểm danh
+    ID: WHITE_STAINED_GLASS_PANE
+    Data: 0
+    Name: "&c&l<date> Chưa Điểm Danh"
+    Glow: false
+  DaDiemDanh:     # Icon khi đã điểm danh
+    ID: LIME_STAINED_GLASS_PANE
+    Data: 0
+    Name: "&a&l<date> Đã Điểm Danh"
+    Glow: false
+Days:
+  1: #Quà điểm danh ngày 1
+    Lore:
+      - "&fPhần thưởng gồm:"
+      - "&f - Than x1"
+    Reward:
+      - give <player> coal 1
+  2: #Quà điểm danh ngày 2
+    Lore:
+      - "&fPhần thưởng gồm:"
+      - "&f - Phôi sắt x1"
+    Reward:
+      - give <player> iron_ingot 1
+  3: #Quà điểm danh ngày 3
+    Lore:
+      - "&fPhần thưởng gồm:"
+      - "&f - Phôi vàng x1"
+    Reward:
+      - give <player> gold_ingot 1
+  4: #Quà điểm danh ngày 4
+    Lore:
+      - "&fPhần thưởng gồm:"
+      - "&f - Kim cương x1"
+    Reward:
+      - give <player> diamond 1
+  5: #Quà điểm danh ngày 5
+    Lore:
+      - "&fPhần thưởng gồm:"
+      - "&f - Ngọc lục bảo x1"
+    Reward:
+      - give <player> emerald 1
+  6:
+    Lore:
+      - "&fPhần thưởng gồm:"
+      - "&f - 100$"
+    Reward:
+      - eco give <player> 100
+  7:
+    Lore:
+      - "&fPhần thưởng gồm:"
+      - "&f - 1 Points"
+    Reward:
+      - points give <player> 1
+  8:
+    Lore:
+      - "&fPhần thưởng gồm:"
+      - "&f - 100$"
+      - "&f - 1 Points"
+    Reward:
+      - eco give <player> 100
+      - points give <player> 1
+  9:
+    Lore:
+      - "&fPhần thưởng gồm:"
+      - "&f - Khối kim cương x8"
+    Reward:
+      - give <player> diamond_block 8
+  10:
+    Lore:
+      - "&fPhần thưởng gồm:"
+      - "&f - Khối ngọc lục bảo x8"
+    Reward:
+      - give <player> emerald_block 8
+  11:
+    Lore:
+      - "&fPhần thưởng gồm:"
+      - "&f - Than x1"
+    Reward:
+      - give <player> coal 1
+  12:
+    Lore:
+      - "&fPhần thưởng gồm:"
+      - "&f - Phôi sắt x1"
+    Reward:
+      - give <player> iron_ingot 1
+  13:
+    Lore:
+      - "&fPhần thưởng gồm:"
+      - "&f - Phôi vàng x1"
+    Reward:
+      - give <player> gold_ingot 1
+  14:
+    Lore:
+      - "&fPhần thưởng gồm:"
+      - "&f - Kim cương x1"
+    Reward:
+      - give <player> diamond 1
+  15:
+    Lore:
+      - "&fPhần thưởng gồm:"
+      - "&f - Ngọc lục bảo x1"
+    Reward:
+      - give <player> emerald 1
+  16:
+    Lore:
+      - "&fPhần thưởng gồm:"
+      - "&f - 100$"
+    Reward:
+      - eco give <player> 100
+  17:
+    Lore:
+      - "&fPhần thưởng gồm:"
+      - "&f - 1 Points"
+    Reward:
+      - points give <player> 1
+  18:
+    Lore:
+      - "&fPhần thưởng gồm:"
+      - "&f - 100$"
+      - "&f - 1 Points"
+    Reward:
+      - eco give <player> 100
+      - points give <player> 1
+  19:
+    Lore:
+      - "&fPhần thưởng gồm:"
+      - "&f - Khối kim cương x8"
+    Reward:
+      - give <player> diamond_block 8
+  20:
+    Lore:
+      - "&fPhần thưởng gồm:"
+      - "&f - Khối ngọc lục bảo x8"
+    Reward:
+      - give <player> emerald_block 8
+  21:
+    Lore:
+      - "&fPhần thưởng gồm:"
+      - "&f - Than x1"
+    Reward:
+      - give <player> coal 1
+  22:
+    Lore:
+      - "&fPhần thưởng gồm:"
+      - "&f - Phôi sắt x1"
+    Reward:
+      - give <player> iron_ingot 1
+  23:
+    Lore:
+      - "&fPhần thưởng gồm:"
+      - "&f - Phôi vàng x1"
+    Reward:
+      - give <player> gold_ingot 1
+  24:
+    Lore:
+      - "&fPhần thưởng gồm:"
+      - "&f - Kim cương x1"
+    Reward:
+      - give <player> diamond 1
+  25:
+    Lore:
+      - "&fPhần thưởng gồm:"
+      - "&f - Ngọc lục bảo x1"
+    Reward:
+      - give <player> emerald 1
+  26:
+    Lore:
+      - "&fPhần thưởng gồm:"
+      - "&f - 100$"
+    Reward:
+      - eco give <player> 100
+  27:
+    Lore:
+      - "&fPhần thưởng gồm:"
+      - "&f - 1 Points"
+    Reward:
+      - points give <player> 1
+  28:
+    Lore:
+      - "&fPhần thưởng gồm:"
+      - "&f - 100$"
+      - "&f - 1 Points"
+    Reward:
+      - eco give <player> 100
+      - points give <player> 1
+  29:
+    Lore:
+      - "&fPhần thưởng gồm:"
+      - "&f - Khối kim cương x8"
+    Reward:
+      - give <player> diamond_block 8
+  30:
+    Lore:
+      - "&fPhần thưởng gồm:"
+      - "&f - Khối ngọc lục bảo x8"
+    Reward:
+      - give <player> emerald_block 8
+  31:
+    Lore:
+      - "&fPhần thưởng gồm:"
+      - "&f - Than x1"
+    Reward:
+      - give <player> coal 1
+TichLuy:
+  7ngay: #Quà tích luỹ khi điểm danh đủ số ngày
+    Icon:
+      ChuaNhanQua: #Icon khi chưa đủ số ngày
+        ID: CHEST_MINECART
+        Data: 0
+        Name: "&7&lTích Luỹ 7 Ngày"
+        Lore:
+          - "&fPhần thưởng gồm:"
+          - "&f - 1000$"
+          - "&f - 10 Points"
+        Glow: false
+      NhanQua: #Icon khi đủ số ngày nhận quà
+        ID: CHEST_MINECART
+        Data: 0
+        Name: "&e&lTích Luỹ 7 Ngày"
+        Lore:
+          - "&fPhần thưởng gồm:"
+          - "&f - 1000$"
+          - "&f - 10 Points"
+        Glow: true
+      DaNhanQua: #Icon khi đã nhận quà
+        ID: MINECART
+        Data: 0
+        Name: "&a&lTích Luỹ 7 Ngày"
+        Lore:
+          - "&fPhần thưởng gồm:"
+          - "&f - 1000$"
+          - "&f - 10 Points"
+        Glow: false
+    #Yêu cầu điểm danh 3 ngày để có thể nhận
+    Require: 7
+    #Phần thưởng khi đủ yêu cầu
+    Reward:
+      - eco give <player> 1000
+      - points give <player> 10
+  14ngay:
+    Icon:
+      ChuaNhanQua:
+        ID: CHEST_MINECART
+        Data: 0
+        Name: "&7&lTích Luỹ 14 Ngày"
+        Lore:
+          - "&fPhần thưởng gồm:"
+          - "&f - 5000$"
+          - "&f - 50 Points"
+        Glow: false
+      NhanQua:
+        ID: CHEST_MINECART
+        Data: 0
+        Name: "&e&lTích Luỹ 14 Ngày"
+        Lore:
+          - "&fPhần thưởng gồm:"
+          - "&f - 5000$"
+          - "&f - 50 Points"
+        Glow: true
+      DaNhanQua:
+        ID: MINECART
+        Data: 0
+        Name: "&a&lTích Luỹ 14 Ngày"
+        Lore:
+          - "&fPhần thưởng gồm:"
+          - "&f - 5000$"
+          - "&f - 50 Points"
+        Glow: false
+    Require: 14
+    Reward:
+      - eco give <player> 5000
+      - points give <player> 50
+  21ngay:
+    Icon:
+      ChuaNhanQua:
+        ID: CHEST_MINECART
+        Data: 0
+        Name: "&7&lTích Luỹ 21 Ngày"
+        Lore:
+          - "&fPhần thưởng gồm:"
+          - "&f - 10000$"
+          - "&f - 100 Points"
+        Glow: false
+      NhanQua:
+        ID: CHEST_MINECART
+        Data: 0
+        Name: "&e&lTích Luỹ 21 Ngày"
+        Lore:
+          - "&fPhần thưởng gồm:"
+          - "&f - 10000$"
+          - "&f - 100 Points"
+        Glow: true
+      DaNhanQua:
+        ID: MINECART
+        Data: 0
+        Name: "&a&lTích Luỹ 21 Ngày"
+        Lore:
+          - "&fPhần thưởng gồm:"
+          - "&f - 10000$"
+          - "&f - 100 Points"
+        Glow: false
+    Require: 21
+    Reward:
+      - eco give <player> 10000
+      - points give <player> 100
+SpecialDay:
+  test:
+    Icon:
+      NgayDiemDanh:
+        ID: MAGMA_CREAM
+        Data: 0
+        Name: "&7&lTest Special Day"
+        Lore:
+          - "&fNgày này méo có thật đâu chỉ test thôi"
+          - "&fPhần thưởng gồm:"
+          - "&f - Đất x1"
+        Glow: false
+      DiemDanh:
+        ID: MAGMA_CREAM
+        Data: 0
+        Name: "&e&lTest Special Day Điểm Danh"
+        Lore:
+          - "&fNgày này méo có thật đâu chỉ test thôi"
+          - "&fPhần thưởng gồm:"
+          - "&f - Đất x1"
+        Glow: true
+      ChuaDiemDanh:
+        ID: MAGMA_CREAM
+        Data: 0
+        Name: "&c&lTest Special Day Chưa Điểm Danh"
+        Lore:
+          - "&fNgày này méo có thật đâu chỉ test thôi"
+          - "&fPhần thưởng gồm:"
+          - "&f - Đất x1"
+        Glow: false
+      DaDiemDanh:
+        ID: MAGMA_CREAM
+        Data: 0
+        Name: "&a&lTest Special Day Đã Điểm Danh"
+        Lore:
+          - "&fNgày này méo có thật đâu chỉ test thôi"
+          - "&fPhần thưởng gồm:"
+          - "&f - Đất x1"
+        Glow: false
+    Require:
+      Date: 3
+      Month: 6
+    Reward:
+      - give <player> dirt 1
+  quockhanh:
+    Icon:
+      NgayDiemDanh:
+        ID: MAGMA_CREAM
+        Data: 0
+        Name: "&7&lQuốc Khánh"
+        Lore:
+          - "&fSắp tới ngày này rồi :))"
+          - "&fPhần thưởng gồm:"
+          - "&f - Khối cỏ x1"
+        Glow: false
+      DiemDanh:
+        ID: MAGMA_CREAM
+        Data: 0
+        Name: "&e&lQuốc Khánh Điểm Danh"
+        Lore:
+          - "&fHôm này là ngày quốc khánh 2/9"
+          - "&fPhần thưởng gồm:"
+          - "&f - Khối cỏ x1"
+        Glow: true
+      ChuaDiemDanh:
+        ID: MAGMA_CREAM
+        Data: 0
+        Name: "&c&lQuốc Khánh Chưa Điểm Danh"
+        Lore:
+          - "&fBạn đã bỏ lỡ ngày này rồi :(("
+          - "&fPhần thưởng gồm:"
+          - "&f - Khối cỏ x1"
+        Glow: false
+      DaDiemDanh:
+        ID: MAGMA_CREAM
+        Data: 0
+        Name: "&a&lQuốc Khánh Đã Điểm Danh"
+        Lore:
+          - "&fBạn đã điểm danh ngày này :))"
+          - "&fPhần thưởng gồm:"
+          - "&f - Khối cỏ x1"
+        Glow: false
+    Require:
+      Date: 10
+      Month: 5
+    Reward:
+      - give <player> grass 1
+
+Message:
+  DiemDanh: "&aBạn đã điểm danh thành công ngày %day%!"
+  DaDiemDanh: "&cBạn đã điểm danh ngày này rồi!"
+  NgayDiemDanh: "&cNgày %day% chưa tới!"
+  ChuaDiemDanh: "&cBạn đã bỏ lỡ ngày %day%!"
+  NotRequire: "&cBạn không đủ số ngày yêu cầu!"
+  NotPlayer: "&cBạn không phải là người chơi!"
+  NoPermission: "&cBạn không có quyền để sử dụng lệnh này!"
+  IsClaimed: "&cBạn đã nhận quà này rồi!"
+  Claiming: "&aHôm nay bạn chưa điểm danh, bấm /diemdanh để điểm danh"
+  SyntaxError: "&cLỗi cú pháp"
+  TichLuySuccess: "&aBạn đã nhận quà tích lũy %days% ngày thành công!"
+  SpecialDaySuccess: "&aBạn đã điểm danh thành công ngày lễ %specialDay%!"
+  Reload: "&aNạp lại config thành công!"

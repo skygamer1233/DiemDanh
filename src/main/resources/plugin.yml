@@ -1,0 +1,20 @@
+name: DiemDanh
+version: '${project.version}'
+main: me.diemdanh.DiemDanh
+api-version: '1.20'
+commands:
+  diemdanh:
+    description: Mở GUI điểm danh hàng ngày
+    usage: /diemdanh
+    permission: diemdanh.use
+  diemdanh reload:
+    description: Nạp lại config
+    usage: /diemdanh
+    permission: diemdanh.reload
+permissions:
+  diemdanh.use:
+    description: Cho phép người chơi sử dụng lệnh /diemdanh
+    default: true
+  diemdanh.reload:
+    description: Cho phép người chơi sử dụng lệnh /diemdanh reload
+    default: op  # Chỉ op mới có quyền reload mặc định
