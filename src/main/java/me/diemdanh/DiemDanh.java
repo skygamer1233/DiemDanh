@@ -105,6 +105,13 @@ public class DiemDanh extends JavaPlugin implements Listener {
                     e.printStackTrace();
                     return true;
                 }
+                
+                playerDataFile = new File(getDataFolder(), "playerdata.yml");
+                if (!playerDataFile.exists()) {
+                    saveResource("playerdata.yml", false);
+                    playerDataFile = new File(getDataFolder(), "playerdata.yml");
+                }
+                playerData = YamlConfiguration.loadConfiguration(playerDataFile);
 
                 
                 diemDanhMessage = color.transalate(getConfig().getString("Message.DiemDanh", "&aBạn đã điểm danh thành công ngày %day%!"));
@@ -117,7 +124,7 @@ public class DiemDanh extends JavaPlugin implements Listener {
                 isClaimedMessage = color.transalate(getConfig().getString("Message.IsClaimed", "&cBạn đã nhận quà này rồi!"));
                 claimingMessage = color.transalate(getConfig().getString("Message.Claiming", "&aHôm nay bạn chưa điểm danh, bấm /diemdanh để điểm danh"));
                 syntaxErrorMessage = color.transalate(getConfig().getString("Message.SyntaxError", "&cLỗi cú pháp"));
-                guiTitle = color.transalate(getConfig().getString("Title", "&a&lĐiểm Danh Tháng <month>"));
+                guiTitle = color.transalate(getConfig().getString("Title", "&a&lĐiểm Danh"));
                 reloadMessage = color.transalate(getConfig().getString("Message.Reload", "&aNạp lại config thành công!"));
 
                 
@@ -358,7 +365,7 @@ public class DiemDanh extends JavaPlugin implements Listener {
                 originalItemKey = getSpecialDayItemKey(playerUUID, specialDayKey);
             }
 
-            
+            // Xử lý điểm danh
             if (originalItemKey.equals("DiemDanh")) {
                 ConfigurationSection rewardSection;
                 if (specialDayKey != null) { 
@@ -377,7 +384,7 @@ public class DiemDanh extends JavaPlugin implements Listener {
                 
                 markPlayerCheckedIn(playerUUID, day);
 
-                
+                // Gửi thông báo điểm danh
                 if (specialDayKey != null) {
                     player.sendMessage(color.transalate(getConfig().getString("Message.SpecialDaySuccess", "&aBạn đã điểm danh thành công ngày lễ %specialDay%!").replace("%specialDay%", specialDayKey)));
                 } else {
@@ -412,7 +419,8 @@ public class DiemDanh extends JavaPlugin implements Listener {
                     for (String command : commands) {
                         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replace("<player>", player.getName()));
                     }
-                    playerData.set(playerUUID + ".tichluy." + daysRequired, true); 
+                    playerData.set(playerUUID + ".tichluy." + daysRequired + ".claimed", true); 
+                    playerData.set(playerUUID + ".tichluy." + daysRequired + ".month", today.getMonthValue()); 
                     savePlayerData();
                     player.sendMessage(color.transalate(getConfig().getString("Message.TichLuySuccess", "&aBạn đã nhận quà tích lũy %days% ngày thành công!").replace("%days%", String.valueOf(daysRequired))));
                 }
@@ -421,6 +429,9 @@ public class DiemDanh extends JavaPlugin implements Listener {
             } else {
                 player.sendMessage(notRequireMessage);
             }
+
+            
+            openDiemDanhGUI(player);
         }
 
         
@@ -514,12 +525,21 @@ public class DiemDanh extends JavaPlugin implements Listener {
     }
     private String getTichLuyItemKey(String playerUUID, int daysRequired) {
         int daysCheckedIn = getDaysCheckedInThisMonth(playerUUID);
-        boolean hasClaimed = playerData.getBoolean(playerUUID + ".tichluy." + daysRequired, false);
+        int currentMonth = LocalDate.now().getMonthValue();
+        int claimedMonth = playerData.getInt(playerUUID + ".tichluy." + daysRequired + ".month", 0); 
+        boolean hasClaimed = playerData.getBoolean(playerUUID + ".tichluy." + daysRequired + ".claimed", false);
 
         
+        if (currentMonth != claimedMonth) {
+            hasClaimed = false;
+            playerData.set(playerUUID + ".tichluy." + daysRequired + ".claimed", false);
+            playerData.set(playerUUID + ".tichluy." + daysRequired + ".month", 0);
+            savePlayerData();
+        }
+
         if (daysCheckedIn >= daysRequired && !hasClaimed) {
-            return "NhanQua"; 
-        } else if (hasClaimed) { 
+            return "NhanQua";
+        } else if (hasClaimed) {
             return "DaNhanQua";
         } else {
             return "ChuaNhanQua";
