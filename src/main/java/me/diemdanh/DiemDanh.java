@@ -300,7 +300,7 @@ public class DiemDanh extends JavaPlugin implements Listener {
                 meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             }
             item.setItemMeta(meta);
-            gui.setItem(36 + i, item); // Đặt vào ô 37, 38, 39
+            gui.setItem(36 + i, item);
         }
 
         player.openInventory(gui);
@@ -404,7 +404,7 @@ public class DiemDanh extends JavaPlugin implements Listener {
                     for (String command : commands) {
                         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replace("<player>", player.getName()));
                     }
-                    playerData.set(playerUUID + ".tichluy." + daysRequired, true); // Đánh dấu đã nhận quà
+                    playerData.set(playerUUID + ".tichluy." + daysRequired, true);
                     savePlayerData();
                     player.sendMessage(color.translateHexColorCodes(getConfig().getString("Message.TichLuySuccess", "&aBạn đã nhận quà tích lũy %days% ngày thành công!").replace("%days%", String.valueOf(daysRequired))));
                 }
@@ -523,7 +523,7 @@ public class DiemDanh extends JavaPlugin implements Listener {
     }
     private String getSpecialDayKey(LocalDate today, int day) {
         for (String key : getConfig().getConfigurationSection("SpecialDay").getKeys(false)) {
-            ConfigurationSection specialDaySection = getConfig().getConfigurationSection("SpecialDay." + key + ".Require"); // Thêm .Require vào đường dẫn
+            ConfigurationSection specialDaySection = getConfig().getConfigurationSection("SpecialDay." + key + ".Require"); 
             int specialDayDate = specialDaySection.getInt("Date");
             int specialDayMonth = specialDaySection.getInt("Month");
 
