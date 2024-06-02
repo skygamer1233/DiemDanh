@@ -17,4 +17,5 @@ Quà ngày lễ (SpecialDay)
 
 
 /diemdanh - Mở bảng điểm danh (không cần permissions)
+
 /diemdanh reload - Reload plugins (diemdanh.reload)
