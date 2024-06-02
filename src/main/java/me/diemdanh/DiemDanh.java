@@ -45,7 +45,7 @@ public class DiemDanh extends JavaPlugin implements Listener {
     private String claimingMessage;
     private String reloadMessage;
     private String syntaxErrorMessage;
-    private String guiTitle; // Biến cho title của GUI
+    private String guiTitle; 
 
 
 
@@ -91,22 +91,21 @@ public class DiemDanh extends JavaPlugin implements Listener {
                 for (String playerUUID : playerData.getKeys(false)) {
                     updatePlayerCheckInData(playerUUID);
                 }
-
-                // Tải lại config từ file
+                
                 File configFile = new File(getDataFolder(), "config.yml");
                 if (!configFile.exists()) {
                     saveDefaultConfig();
                     configFile = new File(getDataFolder(), "config.yml");
                 }
                 try {
-                    getConfig().load(configFile); // Tải lại config từ file
+                    getConfig().load(configFile); 
                 } catch (IOException | InvalidConfigurationException e) {
                     player.sendMessage(color.transalate("&cLỗi khi tải lại config!"));
                     e.printStackTrace();
                     return true;
                 }
 
-                // Cập nhật lại các biến tin nhắn sau khi reload config
+              
                 diemDanhMessage = color.transalate(getConfig().getString("Message.DiemDanh", "&aBạn đã điểm danh thành công ngày %day%!"));
                 daDiemDanhMessage = color.transalate(getConfig().getString("Message.DaDiemDanh", "&cBạn đã điểm danh ngày này rồi!"));
                 ngayDiemDanhMessage = color.transalate(getConfig().getString("Message.NgayDiemDanh", "&cNgày %day% chưa tới!"));
@@ -117,19 +116,19 @@ public class DiemDanh extends JavaPlugin implements Listener {
                 isClaimedMessage = color.transalate(getConfig().getString("Message.IsClaimed", "&cBạn đã nhận quà này rồi!"));
                 claimingMessage = color.transalate(getConfig().getString("Message.Claiming", "&aHôm nay bạn chưa điểm danh, bấm /diemdanh để điểm danh"));
                 syntaxErrorMessage = color.transalate(getConfig().getString("Message.SyntaxError", "&cLỗi cú pháp"));
-                guiTitle = color.transalate(getConfig().getString("Title", "&a&lĐiểm Danh Tháng <month>"));
+                guiTitle = color.transalate(getConfig().getString("Title", "&a&lĐiểm Danh"));
                 reloadMessage = color.transalate(getConfig().getString("Message.Reload", "&aNạp lại config thành công!"));
 
-                // Cập nhật lại title GUI sau khi reload config
+                
                 guiTitle = color.transalate(getConfig().getString("Title", "&a&lĐiểm Danh Tháng <month>"));
 
                 player.sendMessage(reloadMessage);
                 return true;
-            } else if (args.length == 0) { // Không có đối số, mở GUI
+            } else if (args.length == 0) { 
                 openDiemDanhGUI(player);
                 return true;
             } else {
-                player.sendMessage(syntaxErrorMessage); // Gửi thông báo lỗi cú pháp nếu có nhiều hơn 1 đối số
+                player.sendMessage(syntaxErrorMessage); 
                 return true;
             }
         }
@@ -139,23 +138,23 @@ public class DiemDanh extends JavaPlugin implements Listener {
         LocalDate lastCheckInDate = LocalDate.parse(playerData.getString(playerUUID + ".lastCheckIn", "1970-01-01"));
         LocalDate today = LocalDate.now();
 
-        // Kiểm tra xem có ngày lễ nào đã qua mà chưa điểm danh không
+        
         for (String specialDayKey : getConfig().getConfigurationSection("SpecialDay").getKeys(false)) {
             ConfigurationSection specialDaySection = getConfig().getConfigurationSection("SpecialDay." + specialDayKey);
             int specialDayDate = specialDaySection.getInt("Require.Date");
             int specialDayMonth = specialDaySection.getInt("Require.Month");
 
-            // Nếu ngày lễ đã qua và người chơi chưa điểm danh, đánh dấu là đã bỏ lỡ
+            
             if (today.isAfter(LocalDate.of(today.getYear(), specialDayMonth, specialDayDate)) &&
                     !hasPlayerCheckedInSpecialDay(playerUUID, specialDayKey)) {
-                markPlayerMissedCheckIn(playerUUID, specialDayDate); // Đánh dấu là bỏ lỡ điểm danh
+                markPlayerMissedCheckIn(playerUUID, specialDayDate); 
             }
         }
 
-        // Kiểm tra xem có ngày thường nào đã qua mà chưa điểm danh không
+        
         for (int day = 1; day < today.getDayOfMonth(); day++) {
             if (!hasPlayerCheckedInToday(playerUUID, day)) {
-                markPlayerMissedCheckIn(playerUUID, day); // Đánh dấu là bỏ lỡ điểm danh
+                markPlayerMissedCheckIn(playerUUID, day); 
             }
         }
     }
@@ -178,21 +177,21 @@ public class DiemDanh extends JavaPlugin implements Listener {
         }
         List<?> dayEntries = new ArrayList<>(daysSection.getValues(false).values());
 
-        // Tạo các ô ngày lễ
+       
         for (String specialDayKey : getConfig().getConfigurationSection("SpecialDay").getKeys(false)) {
             ConfigurationSection specialDaySection = getConfig().getConfigurationSection("SpecialDay." + specialDayKey);
-            int specialDayDate = specialDaySection.getInt("Require.Date"); // Khai báo specialDayDate ở đây
+            int specialDayDate = specialDaySection.getInt("Require.Date"); 
             int specialDayMonth = specialDaySection.getInt("Require.Month");
             if (today.getMonthValue() == specialDayMonth) {
                 String itemKey = getSpecialDayItemKey(playerUUID, specialDayKey);
                 ConfigurationSection itemSection = getConfig().getConfigurationSection("SpecialDay." + specialDayKey + ".Icon." + itemKey);
 
-                List<String> lore = new ArrayList<>(); // Khởi tạo danh sách lore rỗng
+                List<String> lore = new ArrayList<>(); 
                 if (itemSection != null && itemSection.contains("Lore")) {
                     lore = itemSection.getStringList("Lore");
                 }
 
-                // Chuyển đổi mã màu cho từng dòng trong lore
+                
                 List<String> translatedLore = new ArrayList<>();
                 for (String line : lore) {
                     translatedLore.add(color.transalate(line));
@@ -217,21 +216,21 @@ public class DiemDanh extends JavaPlugin implements Listener {
                     meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
                 }
                 item.setItemMeta(meta);
-                gui.setItem(specialDayDate - 1, item); // Đặt vào ô ngày lễ
+                gui.setItem(specialDayDate - 1, item); 
             }
         }
 
-        // Tạo các ô ngày điểm danh
+        
         for (int day = 1; day <= 31; day++) {
-            // Kiểm tra xem đã có ô ngày lễ tại vị trí này chưa
+            
             if (gui.getItem(day - 1) != null) {
-                continue; // Bỏ qua nếu đã có ô ngày lễ
+                continue; 
             }
 
             String itemKey = getItemKeyForDay(day, playerUUID);
             ConfigurationSection itemSection = getConfig().getConfigurationSection("Item." + itemKey);
 
-            // Lấy lore từ phần Days nếu có, không cần kiểm tra ngày hợp lệ
+            
             List<String> lore = new ArrayList<>();
             if (day - 1 < dayEntries.size()) {
                 Object dayEntry = dayEntries.get(day - 1);
@@ -246,7 +245,7 @@ public class DiemDanh extends JavaPlugin implements Listener {
                 }
             }
 
-            // Nếu không có lore trong Days, lấy lore mặc định từ Item và chuyển đổi màu
+            
             if (lore.isEmpty()) {
                 List<String> rawLore = itemSection.getStringList("Lore");
                 for (String line : rawLore) {
@@ -254,7 +253,7 @@ public class DiemDanh extends JavaPlugin implements Listener {
                 }
             }
 
-            // Lấy Material và xử lý lỗi nếu không tìm thấy
+            
             Material material = Material.getMaterial(itemSection.getString("ID"));
             if (material == null) {
                 getLogger().warning("Invalid Material: " + itemSection.getString("ID"));
@@ -274,10 +273,10 @@ public class DiemDanh extends JavaPlugin implements Listener {
                 meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             }
             item.setItemMeta(meta);
-            gui.setItem(day - 1, item); // Đặt vào ô ngày thường
+            gui.setItem(day - 1, item); 
         }
 
-        // Tạo các ô tích lũy
+        
         for (int i = 0; i < 3; i++) {
             int daysRequired = (i + 1) * 7;
             String itemKey = getTichLuyItemKey(playerUUID, daysRequired);
@@ -308,7 +307,7 @@ public class DiemDanh extends JavaPlugin implements Listener {
                 meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             }
             item.setItemMeta(meta);
-            gui.setItem(36 + i, item); // Đặt vào ô 37, 38, 39
+            gui.setItem(36 + i, item); 
         }
 
         player.openInventory(gui);
@@ -337,33 +336,33 @@ public class DiemDanh extends JavaPlugin implements Listener {
         LocalDate today = LocalDate.now();
         String playerUUID = player.getUniqueId().toString();
 
-        // Kiểm tra ô hợp lệ
-        if (slot < 0 || slot > 44) { // Toàn bộ GUI có 45 ô
+        
+        if (slot < 0 || slot > 44) { 
             event.setCancelled(true);
             return;
         }
 
-        event.setCancelled(true); // Hủy sự kiện click mặc định
+        event.setCancelled(true); 
 
-        // Xử lý điểm danh hàng ngày hoặc ngày lễ (ô 0-30)
+        
         if (slot < 31) {
             int day = slot + 1;
 
-            // Lưu trữ itemKey trước khi cập nhật GUI
+            
             String originalItemKey = getItemKeyForDay(day, playerUUID);
             String specialDayKey = getSpecialDayKey(today, day);
 
-            // Nếu là ngày lễ, sử dụng specialDayKey để xử lý
+            
             if (specialDayKey != null) {
                 originalItemKey = getSpecialDayItemKey(playerUUID, specialDayKey);
             }
 
-            // Xử lý điểm danh
+            
             if (originalItemKey.equals("DiemDanh")) {
                 ConfigurationSection rewardSection;
-                if (specialDayKey != null) { // Nếu là ngày lễ, lấy phần thưởng từ SpecialDay
+                if (specialDayKey != null) { 
                     rewardSection = getConfig().getConfigurationSection("SpecialDay." + specialDayKey);
-                } else { // Nếu không phải ngày lễ, lấy phần thưởng từ Days
+                } else { 
                     rewardSection = getConfig().getConfigurationSection("Days." + day);
                 }
 
@@ -374,10 +373,10 @@ public class DiemDanh extends JavaPlugin implements Listener {
                     }
                 }
 
-                // Đánh dấu điểm danh (cho cả ngày thường và ngày lễ)
+                
                 markPlayerCheckedIn(playerUUID, day);
 
-                // Gửi thông báo điểm danh
+                
                 if (specialDayKey != null) {
                     player.sendMessage(color.transalate(getConfig().getString("Message.SpecialDaySuccess", "&aBạn đã điểm danh thành công ngày lễ %specialDay%!").replace("%specialDay%", specialDayKey)));
                 } else {
@@ -389,20 +388,20 @@ public class DiemDanh extends JavaPlugin implements Listener {
                 } else {
                     player.sendMessage(chuaDiemDanhMessage.replace("%day%", String.valueOf(day)));
                 }
-            } else if (originalItemKey.equals("DaDiemDanh")) { // Kiểm tra trạng thái "DaDiemDanh"
-                player.sendMessage(daDiemDanhMessage); // Gửi thông báo đã điểm danh
+            } else if (originalItemKey.equals("DaDiemDanh")) { 
+                player.sendMessage(daDiemDanhMessage); 
             } else {
-                if (specialDayKey != null) { // Nếu là ngày lễ, lấy tên ngày lễ từ config
+                if (specialDayKey != null) { 
                     String specialDayName = getConfig().getString("SpecialDay." + specialDayKey + ".Icon.NgayDiemDanh.Name", specialDayKey);
                     player.sendMessage(ngayDiemDanhMessage.replace("%day%", specialDayName));
                 } else {
                     player.sendMessage(ngayDiemDanhMessage.replace("%day%", String.valueOf(day)));
                 }
             }
-        } else if (slot >= 36 && slot <= 38) { // Xử lý tích lũy (ô 36-38)
+        } else if (slot >= 36 && slot <= 38) { 
             int daysRequired = (slot - 36 + 1) * 7;
 
-            // Lưu itemKey trước khi cập nhật GUI
+            
             String originalItemKey = getTichLuyItemKey(playerUUID, daysRequired);
 
             if (originalItemKey.equals("NhanQua")) {
@@ -412,7 +411,7 @@ public class DiemDanh extends JavaPlugin implements Listener {
                     for (String command : commands) {
                         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replace("<player>", player.getName()));
                     }
-                    playerData.set(playerUUID + ".tichluy." + daysRequired, true); // Đánh dấu đã nhận quà
+                    playerData.set(playerUUID + ".tichluy." + daysRequired, true); 
                     savePlayerData();
                     player.sendMessage(color.transalate(getConfig().getString("Message.TichLuySuccess", "&aBạn đã nhận quà tích lũy %days% ngày thành công!").replace("%days%", String.valueOf(daysRequired))));
                 }
@@ -423,7 +422,7 @@ public class DiemDanh extends JavaPlugin implements Listener {
             }
         }
 
-        // Cập nhật lại GUI sau khi nhấn vào bất kỳ ô nào
+        
         openDiemDanhGUI(player);
     }
 
@@ -432,18 +431,18 @@ public class DiemDanh extends JavaPlugin implements Listener {
 
 
 
-// Các phương thức hỗ trợ
+
 
     private String getItemKeyForDay(int day, String playerUUID) {
         LocalDate today = LocalDate.now();
-        if (day > today.getDayOfMonth()) { // Kiểm tra ngày hợp lệ trước
-            return "NgayDiemDanh"; // Chưa tới ngày
+        if (day > today.getDayOfMonth()) { 
+            return "NgayDiemDanh"; 
         } else if (hasPlayerCheckedInToday(playerUUID, day)) {
-            return "DaDiemDanh"; // Đã điểm danh
+            return "DaDiemDanh"; 
         } else if (day < today.getDayOfMonth()) {
-            return "ChuaDiemDanh"; // Đã bỏ lỡ
+            return "ChuaDiemDanh"; 
         } else {
-            return "DiemDanh"; // Đến ngày và chưa điểm danh
+            return "DiemDanh"; 
         }
     }
 
@@ -476,13 +475,13 @@ public class DiemDanh extends JavaPlugin implements Listener {
     private void markPlayerCheckedIn(String playerUUID, int day) {
         playerData.set(playerUUID + ".lastCheckIn", LocalDate.now().toString());
 
-        // Cập nhật số ngày tích lũy trong tháng
+        
         int currentMonth = LocalDate.now().getMonthValue();
         int lastCheckInMonth = playerData.getInt(playerUUID + ".lastCheckInMonth", 0);
         int daysCheckedIn = playerData.getInt(playerUUID + ".daysCheckedIn", 0);
 
         if (currentMonth != lastCheckInMonth) {
-            // Reset số ngày tích lũy nếu đã qua tháng mới
+            
             daysCheckedIn = 0;
         }
 
@@ -493,7 +492,7 @@ public class DiemDanh extends JavaPlugin implements Listener {
     }
 
     private void markPlayerMissedCheckIn(String playerUUID, int day) {
-        // (Không cần làm gì ở đây, chỉ cần đánh dấu là đã bỏ lỡ điểm danh)
+        
     }
 
     private void savePlayerData() {
@@ -509,17 +508,17 @@ public class DiemDanh extends JavaPlugin implements Listener {
         if (currentMonth == lastCheckInMonth) {
             return playerData.getInt(playerUUID + ".daysCheckedIn", 0);
         } else {
-            return 0; // Reset về 0 nếu đã qua tháng
+            return 0; 
         }
     }
     private String getTichLuyItemKey(String playerUUID, int daysRequired) {
         int daysCheckedIn = getDaysCheckedInThisMonth(playerUUID);
         boolean hasClaimed = playerData.getBoolean(playerUUID + ".tichluy." + daysRequired, false);
 
-        // Sửa điều kiện kiểm tra đã nhận quà
+        
         if (daysCheckedIn >= daysRequired && !hasClaimed) {
-            return "NhanQua"; // Chỉ trả về "NhanQua" khi đủ ngày và chưa nhận
-        } else if (hasClaimed) { // Kiểm tra đã nhận quà trước
+            return "NhanQua"; 
+        } else if (hasClaimed) { 
             return "DaNhanQua";
         } else {
             return "ChuaNhanQua";
@@ -527,7 +526,7 @@ public class DiemDanh extends JavaPlugin implements Listener {
     }
     private String getMessage(String key) {
         String message = getConfig().getString("Message." + key, "&cMessage not found: " + key);
-        return color.transalate(message); // Sử dụng color.transalate để chuyển đổi mã màu
+        return color.transalate(message); 
     }
     private String getSpecialDayKey(LocalDate today, int day) {
         for (String key : getConfig().getConfigurationSection("SpecialDay").getKeys(false)) {
@@ -535,10 +534,10 @@ public class DiemDanh extends JavaPlugin implements Listener {
             int specialDayDate = specialDaySection.getInt("Date");
             int specialDayMonth = specialDaySection.getInt("Month");
 
-            // Kiểm tra giá trị tháng có hợp lệ không
+            
             if (specialDayMonth < 1 || specialDayMonth > 12) {
                 getLogger().warning("Invalid month for special day: " + key);
-                continue; // Bỏ qua ngày lễ nếu tháng không hợp lệ
+                continue; 
             }
 
             if (day == specialDayDate && today.getMonthValue() == specialDayMonth) {
@@ -554,10 +553,10 @@ public class DiemDanh extends JavaPlugin implements Listener {
         int specialDayDate = specialDaySection.getInt("Date");
         int specialDayMonth = specialDaySection.getInt("Month");
 
-        // Kiểm tra giá trị tháng có hợp lệ không
+        
         if (specialDayMonth < 1 || specialDayMonth > 12) {
             getLogger().warning("Invalid month for special day: " + specialDayKey);
-            return "NgayDiemDanh"; // Trả về "NgayDiemDanh" nếu tháng không hợp lệ
+            return "NgayDiemDanh"; 
         }
 
         if (lastCheckInDate.getYear() == LocalDate.now().getYear() &&
