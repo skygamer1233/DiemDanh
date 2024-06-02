@@ -13,6 +13,12 @@ Nhận quà tích lũy
 
 Quà ngày lễ (SpecialDay)
 
+![image](https://github.com/skygamer1233/DiemDanh/assets/123954037/78345125-cfae-4c50-b196-448ddcef36e1)
+
+![Uploading image.png…]()
+
+
+
 ![image](https://github.com/skygamer1233/DiemDanh/assets/123954037/88409770-a2f7-454e-b82e-751b065e6cc8)
 
 
