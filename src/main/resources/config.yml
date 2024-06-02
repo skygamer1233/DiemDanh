@@ -416,4 +416,4 @@ Message:
   SyntaxError: "&cLỗi cú pháp"
   TichLuySuccess: "&aBạn đã nhận quà tích lũy %days% ngày thành công!"
   SpecialDaySuccess: "&aBạn đã điểm danh thành công ngày lễ %specialDay%!"
-  Reload: "&aNạp lại config thành công!"
+  Reload: "&aNạp lại config và dataplyer thành công!"

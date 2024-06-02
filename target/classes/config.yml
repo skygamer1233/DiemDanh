@@ -321,7 +321,7 @@ SpecialDay:
       NgayDiemDanh:
         ID: MAGMA_CREAM
         Data: 0
-        Name: "&7&lTest Special Day"
+        Name: "&7&lQuốc Tế Thiếu Nhi"
         Lore:
           - "&fNgày này méo có thật đâu chỉ test thôi"
           - "&fPhần thưởng gồm:"
@@ -330,7 +330,7 @@ SpecialDay:
       DiemDanh:
         ID: MAGMA_CREAM
         Data: 0
-        Name: "&e&lTest Special Day Điểm Danh"
+        Name: "&7&lQuốc Tế Thiếu Nhi Điểm Danh"
         Lore:
           - "&fNgày này méo có thật đâu chỉ test thôi"
           - "&fPhần thưởng gồm:"
@@ -339,7 +339,7 @@ SpecialDay:
       ChuaDiemDanh:
         ID: MAGMA_CREAM
         Data: 0
-        Name: "&c&lTest Special Day Chưa Điểm Danh"
+        Name: "&7&lQuốc Tế Thiếu Nhi Chưa Điểm Danh"
         Lore:
           - "&fNgày này méo có thật đâu chỉ test thôi"
           - "&fPhần thưởng gồm:"
@@ -348,14 +348,14 @@ SpecialDay:
       DaDiemDanh:
         ID: MAGMA_CREAM
         Data: 0
-        Name: "&a&lTest Special Day Đã Điểm Danh"
+        Name: "&7&lQuốc Tế Thiếu Nhi Đã Điểm Danh"
         Lore:
           - "&fNgày này méo có thật đâu chỉ test thôi"
           - "&fPhần thưởng gồm:"
           - "&f - Đất x1"
         Glow: false
     Require:
-      Date: 3
+      Date: 1
       Month: 6
     Reward:
       - give <player> dirt 1
@@ -398,8 +398,8 @@ SpecialDay:
           - "&f - Khối cỏ x1"
         Glow: false
     Require:
-      Date: 10
-      Month: 5
+      Date: 11
+      Month: 6
     Reward:
       - give <player> grass 1
 
@@ -416,4 +416,4 @@ Message:
   SyntaxError: "&cLỗi cú pháp"
   TichLuySuccess: "&aBạn đã nhận quà tích lũy %days% ngày thành công!"
   SpecialDaySuccess: "&aBạn đã điểm danh thành công ngày lễ %specialDay%!"
-  Reload: "&aNạp lại config thành công!"
+  Reload: "&aNạp lại config và dataplyer thành công!"
