@@ -6,7 +6,7 @@
 
   <groupId>me</groupId>
   <artifactId>DiemDanh</artifactId>
-  <version>1.1-BETA</version>
+  <version>1.2-BETA</version>
   <packaging>jar</packaging>
 
   <name>DiemDanh</name>
@@ -50,6 +50,13 @@
                           <exclude>META-INF/MANIFEST.MF</exclude>
                       </excludes>
                   </filter>
+                      <filter>
+                          <artifact>*:*</artifact>
+                          <excludes>
+                              <exclude>META-INF/maven/com.github.cryptomorin/XSeries/pom.properties</exclude>
+                              <exclude>META-INF/maven/com.github.cryptomorin/XSeries/pom.xml</exclude>
+                          </excludes>
+                      </filter>
                   </filters>
               </configuration>
           </execution>
