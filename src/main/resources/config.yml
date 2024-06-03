@@ -20,6 +20,15 @@ Item:
     Data: 0
     Name: "&a&l<date> Đã Điểm Danh"
     Glow: false
+  ThongTin:
+    ID: BOOK
+    Data: 0
+    Name: "&e&lThông tin điểm danh"
+    Lore:
+      - "&aSố ngày tích lũy trong tháng: <days>"
+      - "&bSố phiếu điểm danh bù: <tickets>"
+      - "&cPlugin Rebuilt by SkyGamer"
+    Glow: true
 Days:
   1: #Quà điểm danh ngày 1
     Lore:
@@ -402,6 +411,16 @@ SpecialDay:
       Month: 6
     Reward:
       - give <player> grass 1
+Misc:
+  ThongTin:
+    ID: BOOK
+    Data: 0
+    Name: "&e&lThông tin điểm danh"
+    Lore:
+      - "&aSố ngày tích lũy trong tháng: <days>"
+      - "  "
+      - "&cPlugin Rebuilt by SkyGamer"
+    Glow: false
 
 Message:
   DiemDanh: "&aBạn đã điểm danh thành công ngày %day%!"
