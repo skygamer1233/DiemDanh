@@ -411,16 +411,7 @@ SpecialDay:
       Month: 6
     Reward:
       - give <player> grass 1
-Misc:
-  ThongTin:
-    ID: BOOK
-    Data: 0
-    Name: "&e&lThông tin điểm danh"
-    Lore:
-      - "&aSố ngày tích lũy trong tháng: <days>"
-      - "  "
-      - "&cPlugin Rebuilt by SkyGamer"
-    Glow: false
+
 
 Message:
   DiemDanh: "&aBạn đã điểm danh thành công ngày %day%!"
