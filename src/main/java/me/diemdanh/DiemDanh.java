@@ -185,9 +185,11 @@ public class DiemDanh extends JavaPlugin implements Listener {
 
 
     private void openDiemDanhGUI(Player player) {
-        Inventory gui = Bukkit.createInventory(null, 45, guiTitle);
         LocalDate today = LocalDate.now();
         String playerUUID = player.getUniqueId().toString();
+        String titleWithMonth = guiTitle.replace("<month>", String.valueOf(today.getMonthValue()));
+        Inventory gui = Bukkit.createInventory(null, 45, titleWithMonth);
+
 
         ConfigurationSection daysSection = getConfig().getConfigurationSection("Days");
         if (daysSection == null) {
@@ -215,6 +217,7 @@ public class DiemDanh extends JavaPlugin implements Listener {
 
 
         for (int day = 1; day <= 31; day++) {
+
             if (gui.getItem(day - 1) != null) {
                 continue;
             }
@@ -227,8 +230,30 @@ public class DiemDanh extends JavaPlugin implements Listener {
                 continue;
             }
 
-            ItemStack item = createItemFromConfig(itemSection, day, playerUUID);
 
+            List<String> lore = getLoreFromConfig(getConfig().getConfigurationSection("Days." + day), "Lore"); // Lấy lore từ Days trước
+
+
+            if (lore.isEmpty()) {
+                lore = getLoreFromConfig(itemSection, "Lore");
+            }
+
+
+            XMaterial xMaterial = XMaterial.matchXMaterial(itemSection.getString("ID")).orElse(XMaterial.BARRIER);
+            Material material = xMaterial.parseMaterial();
+
+            String name = color.transalate(itemSection.getString("Name").replace("<date>", String.valueOf(day)));
+            boolean glow = itemSection.getBoolean("Glow");
+
+            ItemStack item = new ItemStack(material, 1);
+            ItemMeta meta = item.getItemMeta();
+            meta.setDisplayName(name);
+            meta.setLore(lore);
+            if (glow) {
+                meta.addEnchant(Enchantment.DURABILITY, 1, true);
+                meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+            }
+            item.setItemMeta(meta);
             gui.setItem(day - 1, item);
         }
 
@@ -274,6 +299,21 @@ public class DiemDanh extends JavaPlugin implements Listener {
         item.setItemMeta(meta);
         return item;
     }
+    private List<String> getLoreFromConfig(ConfigurationSection section, String key) {
+        List<String> lore = new ArrayList<>();
+        if (section.isList(key)) {
+            for (Object obj : section.getList(key)) {
+                if (obj instanceof String) {
+                    lore.add(color.transalate((String) obj));
+                } else if (obj instanceof List) {
+                    for (String nestedLine : (List<String>) obj) {
+                        lore.add(color.transalate(nestedLine));
+                    }
+                }
+            }
+        }
+        return lore;
+    }
 
 
 
@@ -290,7 +330,7 @@ public class DiemDanh extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        if (!event.getView().getTitle().equals(guiTitle)) return;
+        if (!event.getView().getTitle().equals(guiTitle.replace("<month>", String.valueOf(LocalDate.now().getMonthValue())))) return;
         if (!(event.getWhoClicked() instanceof Player)) {
             event.getWhoClicked().sendMessage(notPlayerMessage);
             return;
