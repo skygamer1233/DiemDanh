@@ -16,7 +16,8 @@ Quà ngày lễ (SpecialDay)
 ![image](https://github.com/skygamer1233/DiemDanh/assets/123954037/78345125-cfae-4c50-b196-448ddcef36e1)
 
 
-![hinhanh2](https://github.com/skygamer1233/DiemDanh/assets/123954037/a65e8d70-67e4-4399-a44c-fe98c949747c)
+![image](https://github.com/skygamer1233/DiemDanh/assets/123954037/4ebf09d9-c727-4e61-a324-d4814add8b5a)
+
 
 
 ![image](https://github.com/skygamer1233/DiemDanh/assets/123954037/88409770-a2f7-454e-b82e-751b065e6cc8)
