@@ -1,4 +1,4 @@
-Title: "&a&lĐiểm Danh Tháng <month>" # Title của GUI
+Title: "&b&lĐiểm Danh Tháng <month>" # Title của GUI
 Item:
   NgayDiemDanh:  # Icon khi chưa tới ngày điểm danh
     ID: GRAY_STAINED_GLASS_PANE
@@ -20,13 +20,27 @@ Item:
     Data: 0
     Name: "&a&l<date> Đã Điểm Danh"
     Glow: false
+  DiemDanhBu:     # Icon khi có thể điểm danh bù
+    ID: BROWN_STAINED_GLASS_PANE
+    Data: 0
+    Name: "&b&l<date> Điểm Danh Bù"
+    Glow: false
   ThongTin:
     ID: BOOK
     Data: 0
     Name: "&e&lThông tin điểm danh"
     Lore:
       - "&aSố ngày tích lũy trong tháng: <days>"
-      - "&bSố phiếu điểm danh bù: <tickets>"
+      - "  "
+      - "&cPlugin Rebuilt by SkyGamer"
+    Glow: true
+  Ticket:
+    ID: NAME_TAG
+    Data: 0
+    Name: "&e&lPhiếu điểm danh bù"
+    Lore:
+      - "&aSố phiếu điểm danh bù: <tickets>"
+      - "  "
       - "&cPlugin Rebuilt by SkyGamer"
     Glow: true
 Days:
@@ -346,7 +360,7 @@ SpecialDay:
           - "&f - Đất x1"
         Glow: true
       ChuaDiemDanh:
-        ID: MAGMA_CREAM
+        ID: COAL
         Data: 0
         Name: "&7&lQuốc Tế Thiếu Nhi Chưa Điểm Danh"
         Lore:
@@ -363,11 +377,21 @@ SpecialDay:
           - "&fPhần thưởng gồm:"
           - "&f - Đất x1"
         Glow: false
+      DiemDanhBu:
+        ID: COAL_BLOCK
+        Data: 0
+        Name: "&7&lQuốc Tế Thiếu Nhi Bù Điểm Danh"
+        Lore:
+          - "&fNgày này méo có thật đâu chỉ test thôi"
+          - "&fPhần thưởng gồm:"
+          - "&f - Đất x1"
+        Glow: false
     Require:
-      Date: 1
+      Date: 3
       Month: 6
     Reward:
       - give <player> dirt 1
+      - give <player> diamond 50
   quockhanh:
     Icon:
       NgayDiemDanh:
@@ -406,12 +430,19 @@ SpecialDay:
           - "&fPhần thưởng gồm:"
           - "&f - Khối cỏ x1"
         Glow: false
+      DiemDanhBu:
+        ID: COAL_BLOCK
+        Data: 0
+        Name: "&7&lQuốc Khánh Bù Điểm Danh"
+        Lore:
+          - "&fNgày này méo có thật đâu chỉ test thôi"
+          - "&fPhần thưởng gồm:"
+          - "&f - Đất x1"
     Require:
       Date: 11
       Month: 6
     Reward:
       - give <player> grass 1
-
 
 Message:
   DiemDanh: "&aBạn đã điểm danh thành công ngày %day%!"
@@ -426,4 +457,9 @@ Message:
   SyntaxError: "&cLỗi cú pháp"
   TichLuySuccess: "&aBạn đã nhận quà tích lũy %days% ngày thành công!"
   SpecialDaySuccess: "&aBạn đã điểm danh thành công ngày lễ %specialDay%!"
-  Reload: "&aNạp lại config và dataplyer thành công!"
+  Reload: "&aNạp lại config thành công!"
+  GiveTicketSuccess: "&aĐã thêm %amount% ticket cho %player%!"
+  ReceiveTicket: "&aBạn đã nhận được %amount% ticket điểm danh bù!"
+  PlayerNotFound: "&cKhông tìm thấy người chơi!"
+  InvalidTicketAmount: "&cSố lượng ticket phải lớn hơn 0 và phải là số nguyên!"
+  SpecialDayDaDiemDanh: "&cBạn đã điểm danh ngày lễ này rồi!"
