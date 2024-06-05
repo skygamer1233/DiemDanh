@@ -13,6 +13,8 @@ Nhận quà tích lũy
 
 Quà ngày lễ (SpecialDay)
 
+Điểm Danh Bù
+
 ![image](https://github.com/skygamer1233/DiemDanh/assets/123954037/78345125-cfae-4c50-b196-448ddcef36e1)
 
 
@@ -26,3 +28,5 @@ Quà ngày lễ (SpecialDay)
 /diemdanh - Mở bảng điểm danh (không cần permissions)
 
 /diemdanh reload - Reload plugins (diemdanh.reload)
+
+/diemdanh giveticket <player> <amount> (diemdanh.giveticket)
