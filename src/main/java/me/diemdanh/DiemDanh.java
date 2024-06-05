@@ -130,6 +130,48 @@ public class DiemDanh extends JavaPlugin implements Listener {
 
                 player.sendMessage(reloadMessage);
                 return true;
+            } else if (args.length == 3 && args[0].equalsIgnoreCase("giveticket")) {
+                if (!sender.hasPermission("diemdanh.giveticket")) {
+                    sender.sendMessage(noPermissionMessage);
+                    return true;
+                }
+
+                Player targetPlayer = Bukkit.getPlayer(args[1]);
+                if (targetPlayer == null) {
+                    sender.sendMessage(getMessage("PlayerNotFound"));
+                    return true;
+                }
+
+                int amount;
+                try {
+                    amount = Integer.parseInt(args[2]);
+                    if (amount <= 0) {
+                        sender.sendMessage(getMessage("InvalidTicketAmount"));
+                        return true;
+                    }
+                } catch (NumberFormatException e) {
+                    sender.sendMessage(getMessage("InvalidTicketAmount"));
+                    return true;
+                }
+
+                String targetPlayerUUID = targetPlayer.getUniqueId().toString();
+                int currentTickets = playerData.getInt(targetPlayerUUID + ".tickets", 0);
+                playerData.set(targetPlayerUUID + ".tickets", currentTickets + amount);
+                savePlayerData();
+
+
+                String giveTicketSuccessMessage = getMessage("GiveTicketSuccess")
+                        .replace("%amount%", String.valueOf(amount))
+                        .replace("%player%", targetPlayer.getName());
+                sender.sendMessage(giveTicketSuccessMessage);
+
+                String receiveTicketMessage = getMessage("ReceiveTicket")
+                        .replace("%amount%", String.valueOf(amount));
+                targetPlayer.sendMessage(receiveTicketMessage);
+
+                return true;
+
+
             } else if (args.length == 0) {
                 openDiemDanhGUI(player);
                 return true;
@@ -153,6 +195,7 @@ public class DiemDanh extends JavaPlugin implements Listener {
 
         LocalDate today = LocalDate.now();
 
+
         for (String specialDayKey : getConfig().getConfigurationSection("SpecialDay").getKeys(false)) {
             ConfigurationSection specialDaySection = getConfig().getConfigurationSection("SpecialDay." + specialDayKey);
             int specialDayDate = specialDaySection.getInt("Require.Date");
@@ -170,7 +213,8 @@ public class DiemDanh extends JavaPlugin implements Listener {
             }
         }
 
-        for (int day = 1; day < today.getDayOfMonth(); day++) {
+
+        for (int day = 1; day <= today.lengthOfMonth(); day++) {
             if (!hasPlayerCheckedInToday(playerUUID, day)) {
                 markPlayerMissedCheckIn(playerUUID, day);
             }
@@ -189,6 +233,8 @@ public class DiemDanh extends JavaPlugin implements Listener {
         String playerUUID = player.getUniqueId().toString();
         String titleWithMonth = guiTitle.replace("<month>", String.valueOf(today.getMonthValue()));
         Inventory gui = Bukkit.createInventory(null, 45, titleWithMonth);
+
+        updateMissedDays(playerUUID);
 
 
         ConfigurationSection daysSection = getConfig().getConfigurationSection("Days");
@@ -223,7 +269,15 @@ public class DiemDanh extends JavaPlugin implements Listener {
             }
 
             String itemKey = getItemKeyForDay(day, playerUUID);
-            ConfigurationSection itemSection = getConfig().getConfigurationSection("Item." + itemKey);
+            ConfigurationSection itemSection;
+
+
+            if (itemKey.equals("DiemDanhBu")) {
+                itemSection = getConfig().getConfigurationSection("Item." + itemKey);
+            } else {
+                itemSection = getConfig().getConfigurationSection("Item." + itemKey);
+            }
+
 
             if (itemSection == null) {
                 getLogger().warning("Missing item section for key: " + itemKey);
@@ -231,11 +285,26 @@ public class DiemDanh extends JavaPlugin implements Listener {
             }
 
 
-            List<String> lore = getLoreFromConfig(getConfig().getConfigurationSection("Days." + day), "Lore"); // Lấy lore từ Days trước
+            List<String> lore = new ArrayList<>();
+            if (day <= today.getDayOfMonth() && day - 1 < dayEntries.size()) {
+                Object dayEntry = dayEntries.get(day - 1);
+                if (dayEntry instanceof ConfigurationSection) {
+                    ConfigurationSection daySection = (ConfigurationSection) dayEntry;
+                    if (daySection.contains("Lore")) {
+                        lore = daySection.getStringList("Lore");
+                    }
+                }
+            }
 
 
-            if (lore.isEmpty()) {
-                lore = getLoreFromConfig(itemSection, "Lore");
+            if (lore.isEmpty() && !itemKey.equals("DiemDanhBu")) {
+                lore = itemSection.getStringList("Lore");
+            }
+
+
+            List<String> translatedLore = new ArrayList<>();
+            for (String line : lore) {
+                translatedLore.add(color.transalate(line));
             }
 
 
@@ -248,12 +317,13 @@ public class DiemDanh extends JavaPlugin implements Listener {
             ItemStack item = new ItemStack(material, 1);
             ItemMeta meta = item.getItemMeta();
             meta.setDisplayName(name);
-            meta.setLore(lore);
+            meta.setLore(translatedLore);
             if (glow) {
                 meta.addEnchant(Enchantment.DURABILITY, 1, true);
                 meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             }
             item.setItemMeta(meta);
+
             gui.setItem(day - 1, item);
         }
 
@@ -267,6 +337,16 @@ public class DiemDanh extends JavaPlugin implements Listener {
         }
 
 
+        ConfigurationSection ticketSection = getConfig().getConfigurationSection("Item.Ticket");
+        if (ticketSection != null) {
+            int tickets = playerData.getInt(playerUUID + ".tickets", 0);
+            ItemStack ticketItem = createItemFromConfig(ticketSection, tickets, playerUUID);
+            gui.setItem(34, ticketItem);
+        } else {
+            getLogger().warning("Missing 'Item.Ticket' section in config.yml");
+        }
+
+
         ConfigurationSection thongTinSection = getConfig().getConfigurationSection("Item.ThongTin");
         if (thongTinSection != null) {
             int daysCheckedIn = getDaysCheckedInThisMonth(playerUUID);
@@ -275,6 +355,8 @@ public class DiemDanh extends JavaPlugin implements Listener {
         } else {
             getLogger().warning("Missing 'Item.ThongTin' section in config.yml");
         }
+
+
 
         player.openInventory(gui);
     }
@@ -285,7 +367,9 @@ public class DiemDanh extends JavaPlugin implements Listener {
         List<String> rawlore = itemSection.getStringList("Lore");
         List<String> translatedLore = new ArrayList<>();
         for (String line : rawlore) {
-            translatedLore.add(color.transalate(line.replace("<days>", String.valueOf(replaceValue))));
+            line = line.replace("<days>", String.valueOf(getDaysCheckedInThisMonth(playerUUID)));
+            line = line.replace("<tickets>", String.valueOf(playerData.getInt(playerUUID + ".tickets", 0)));
+            translatedLore.add(color.transalate(line));
         }
 
         ItemStack item = new ItemStack(material, 1);
@@ -314,14 +398,6 @@ public class DiemDanh extends JavaPlugin implements Listener {
         }
         return lore;
     }
-
-
-
-
-
-
-
-
 
 
 
@@ -365,18 +441,41 @@ public class DiemDanh extends JavaPlugin implements Listener {
 
                 markPlayerCheckedIn(playerUUID, slot + 1);
 
-
-                if (specialDayKey != null) {
-                    playerData.set(playerUUID + ".lastCheckIn", today.toString());
-                    savePlayerData();
-                }
-
                 String messageKey = (specialDayKey != null) ? "SpecialDayDiemDanhThanhCong" : "DiemDanh";
                 player.sendMessage(color.transalate(getConfig().getString("Message." + messageKey, "&aBạn đã điểm danh thành công!")
                         .replace("%day%", String.valueOf(slot + 1))
                         .replace("%specialDay%", specialDayKey != null ? specialDayKey : "")));
+            } else if (originalItemKey.equals("DiemDanhBu")) {
+
+                if (playerData.getInt(playerUUID + ".tickets", 0) > 0) {
+                    ConfigurationSection rewardSection = (specialDayKey != null)
+                            ? getConfig().getConfigurationSection("SpecialDay." + specialDayKey)
+                            : getConfig().getConfigurationSection("Days." + (slot + 1));
+
+                    if (rewardSection != null) {
+                        executeCommands(rewardSection.getStringList("Reward"), player);
+                    }
+
+
+                    playerData.set(playerUUID + ".tickets", playerData.getInt(playerUUID + ".tickets", 0) - 1);
+                    List<Integer> missedDays = playerData.getIntegerList(playerUUID + ".missedDays");
+                    missedDays.remove(Integer.valueOf(slot + 1));
+                    playerData.set(playerUUID + ".missedDays", missedDays);
+
+
+                    markPlayerCheckedIn(playerUUID, slot + 1);
+
+                    savePlayerData();
+                    player.sendMessage(diemDanhMessage.replace("%day%", String.valueOf(slot + 1)));
+                } else {
+                    player.sendMessage(notRequireMessage);
+                }
             } else if (originalItemKey.equals("ChuaDiemDanh")) {
                 player.sendMessage(isToday(slot + 1) ? claimingMessage : chuaDiemDanhMessage.replace("%day%", String.valueOf(slot + 1)));
+            } else if (specialDayKey != null && originalItemKey.equals("DaDiemDanh")) {
+                player.sendMessage(color.transalate(getConfig().getString("Message.SpecialDayDaDiemDanh", "&cBạn đã điểm danh ngày lễ này rồi!")));
+            } else if (originalItemKey.equals("DaDiemDanh")) {
+                player.sendMessage(daDiemDanhMessage);
             } else {
                 String dayName = (specialDayKey != null)
                         ? getConfig().getString("SpecialDay." + specialDayKey + ".Icon.NgayDiemDanh.Name", specialDayKey)
@@ -392,7 +491,7 @@ public class DiemDanh extends JavaPlugin implements Listener {
                     executeCommands(rewardSection.getStringList("Reward"), player);
                     playerData.set(playerUUID + ".tichluy." + (slot - 36 + 1) * 7, true);
                     savePlayerData();
-                    player.sendMessage(color.transalate(getConfig().getString("Message.NhanQuaTichLuyThanhCong", "&aBạn đã nhận quà tích lũy %days% ngày thành công!").replace("%days%", String.valueOf((slot - 36 + 1) * 7))));
+                    player.sendMessage(color.transalate(getConfig().getString("Message.TichLuySuccess", "&aBạn đã nhận quà tích lũy %days% ngày thành công!").replace("%days%", String.valueOf((slot - 36 + 1) * 7))));
                 }
             } else if (originalItemKey.equals("DaNhanQua")) {
                 player.sendMessage(isClaimedMessage);
@@ -418,16 +517,15 @@ public class DiemDanh extends JavaPlugin implements Listener {
 
 
 
+
     private String getItemKeyForDay(int day, String playerUUID) {
         LocalDate today = LocalDate.now();
-        String specialDayKey = getSpecialDayKey(today, day);
-
-        if (specialDayKey != null) {
-            return getSpecialDayItemKey(playerUUID, specialDayKey);
-        } else if (day > today.getDayOfMonth()) {
+        if (day > today.getDayOfMonth()) {
             return "NgayDiemDanh";
         } else if (playerData.getIntegerList(playerUUID + ".checkedDays").contains(day)) {
             return "DaDiemDanh";
+        } else if (playerData.getInt(playerUUID + ".tickets", 0) > 0 && playerData.getIntegerList(playerUUID + ".missedDays").contains(day)) {
+            return "DiemDanhBu";
         } else if (day < today.getDayOfMonth()) {
             return "ChuaDiemDanh";
         } else {
@@ -446,7 +544,7 @@ public class DiemDanh extends JavaPlugin implements Listener {
 
         if (!playerData.contains(playerUUID)) {
 
-            playerData.set(playerUUID + ".lastCheckIn", "2020-01-01");
+            playerData.set(playerUUID + ".lastCheckIn", LocalDate.now().toString());
             playerData.set(playerUUID + ".daysCheckedIn", 0);
             playerData.set(playerUUID + ".lastCheckInMonth", LocalDate.now().getMonthValue());
             playerData.set(playerUUID + ".checkedDays", new ArrayList<>());
@@ -462,11 +560,15 @@ public class DiemDanh extends JavaPlugin implements Listener {
             savePlayerData();
         }
 
+        updateMissedDays(playerUUID);
+
+
 
         int lastCheckInMonth = playerData.getInt(playerUUID + ".lastCheckInMonth", 0);
         if (today.getMonthValue() != lastCheckInMonth) {
             playerData.set(playerUUID + ".checkedDays", new ArrayList<>());
             playerData.set(playerUUID + ".daysCheckedIn", 0);
+            playerData.set(playerUUID + ".missedDays", new ArrayList<>());
             for (int daysRequired : new int[]{7, 14, 21}) {
                 playerData.set(playerUUID + ".tichluy." + daysRequired, false);
             }
@@ -479,6 +581,22 @@ public class DiemDanh extends JavaPlugin implements Listener {
             for (String key : playerData.getConfigurationSection(playerUUID + ".specialDays").getKeys(false)) {
                 playerData.set(playerUUID + ".specialDays." + key, false);
             }
+            savePlayerData();
+        }
+    }
+    private void updateMissedDays(String playerUUID) {
+        LocalDate today = LocalDate.now();
+        int lastCheckInMonth = playerData.getInt(playerUUID + ".lastCheckInMonth", 0);
+
+        if (today.getMonthValue() != lastCheckInMonth || !playerData.contains(playerUUID + ".missedDays")) {
+            List<Integer> missedDays = new ArrayList<>();
+            for (int day = 1; day < today.getDayOfMonth(); day++) {
+                if (!hasPlayerCheckedInToday(playerUUID, day)) {
+                    missedDays.add(day);
+                }
+            }
+            playerData.set(playerUUID + ".missedDays", missedDays);
+            playerData.set(playerUUID + ".lastCheckInMonth", today.getMonthValue());
             savePlayerData();
         }
     }
@@ -547,7 +665,18 @@ public class DiemDanh extends JavaPlugin implements Listener {
 
 
     private void markPlayerMissedCheckIn(String playerUUID, int day) {
+        int currentMonth = LocalDate.now().getMonthValue();
+        int lastCheckInMonth = playerData.getInt(playerUUID + ".lastCheckInMonth", 0);
 
+        if (currentMonth == lastCheckInMonth) {
+
+            List<Integer> missedDays = playerData.getIntegerList(playerUUID + ".missedDays");
+            if (!missedDays.contains(day)) {
+                missedDays.add(day);
+                playerData.set(playerUUID + ".missedDays", missedDays);
+                savePlayerData();
+            }
+        }
     }
 
     private void savePlayerData() {
@@ -604,17 +733,27 @@ public class DiemDanh extends JavaPlugin implements Listener {
 
     private String getSpecialDayItemKey(String playerUUID, String specialDayKey) {
         boolean hasCheckedIn = playerData.getBoolean(playerUUID + ".specialDays." + specialDayKey, false);
+        ConfigurationSection specialDaySection = getConfig().getConfigurationSection("SpecialDay." + specialDayKey + ".Require");
+        int specialDayDate = specialDaySection.getInt("Date");
+        int specialDayMonth = specialDaySection.getInt("Month");
+
+        LocalDate specialDay = LocalDate.of(LocalDate.now().getYear(), specialDayMonth, specialDayDate);
 
         if (hasCheckedIn) {
             return "DaDiemDanh";
-        } else if (isToday(getConfig().getInt("SpecialDay." + specialDayKey + ".Require.Date"))) {
+        } else if (LocalDate.now().isEqual(specialDay)) {
             return "DiemDanh";
-        } else if (LocalDate.now().isAfter(LocalDate.of(LocalDate.now().getYear(), getConfig().getInt("SpecialDay." + specialDayKey + ".Require.Month"), getConfig().getInt("SpecialDay." + specialDayKey + ".Require.Date")))) {
-            return "ChuaDiemDanh";
+        } else if (LocalDate.now().isAfter(specialDay)) {
+            if (playerData.getInt(playerUUID + ".tickets", 0) > 0) {
+                return "DiemDanhBu";
+            } else {
+                return "ChuaDiemDanh";
+            }
         } else {
             return "NgayDiemDanh";
         }
     }
+
 
 
 }
