@@ -172,7 +172,7 @@ public class DiemDanh extends JavaPlugin implements Listener {
 
 
             } else if (args.length == 0) {
-                if (player == null) { 
+                if (player == null) {
                     sender.sendMessage(notPlayerMessage);
                     return true;
                 }
@@ -184,49 +184,6 @@ public class DiemDanh extends JavaPlugin implements Listener {
             }
         }
         return false;
-    }
-    private void updatePlayerCheckInData(String playerUUID) {
-        String lastCheckInStr = playerData.getString(playerUUID + ".lastCheckIn");
-        LocalDate lastCheckInDate;
-
-
-        if (lastCheckInStr != null && !lastCheckInStr.isEmpty()) {
-            lastCheckInDate = LocalDate.parse(lastCheckInStr);
-        } else {
-            lastCheckInDate = LocalDate.of(1970, 1, 1);
-        }
-
-        LocalDate today = LocalDate.now();
-
-
-        for (String specialDayKey : getConfig().getConfigurationSection("SpecialDay").getKeys(false)) {
-            ConfigurationSection specialDaySection = getConfig().getConfigurationSection("SpecialDay." + specialDayKey);
-            int specialDayDate = specialDaySection.getInt("Require.Date");
-            int specialDayMonth = specialDaySection.getInt("Require.Month");
-
-
-            if (specialDayMonth < 1 || specialDayMonth > 12) {
-                getLogger().warning("Invalid month for special day: " + specialDayKey);
-                continue;
-            }
-
-            if (today.isAfter(LocalDate.of(today.getYear(), specialDayMonth, specialDayDate)) &&
-                    !hasPlayerCheckedInSpecialDay(playerUUID, specialDayKey)) {
-                markPlayerMissedCheckIn(playerUUID, specialDayDate);
-            }
-        }
-
-
-        for (int day = 1; day <= today.lengthOfMonth(); day++) {
-            if (!hasPlayerCheckedInToday(playerUUID, day)) {
-                markPlayerMissedCheckIn(playerUUID, day);
-            }
-        }
-    }
-
-
-    private boolean hasPlayerCheckedInSpecialDay(String playerUUID, String specialDayKey) {
-        return playerData.getBoolean(playerUUID + ".specialDays." + specialDayKey, false);
     }
 
 
@@ -288,7 +245,7 @@ public class DiemDanh extends JavaPlugin implements Listener {
 
 
             List<String> lore = new ArrayList<>();
-            if (day <= today.getDayOfMonth() && day - 1 < dayEntries.size()) {
+            if (day - 1 < dayEntries.size()) { // Chỉ kiểm tra xem có phần thưởng cho ngày này không
                 Object dayEntry = dayEntries.get(day - 1);
                 if (dayEntry instanceof ConfigurationSection) {
                     ConfigurationSection daySection = (ConfigurationSection) dayEntry;
@@ -385,21 +342,7 @@ public class DiemDanh extends JavaPlugin implements Listener {
         item.setItemMeta(meta);
         return item;
     }
-    private List<String> getLoreFromConfig(ConfigurationSection section, String key) {
-        List<String> lore = new ArrayList<>();
-        if (section.isList(key)) {
-            for (Object obj : section.getList(key)) {
-                if (obj instanceof String) {
-                    lore.add(color.transalate((String) obj));
-                } else if (obj instanceof List) {
-                    for (String nestedLine : (List<String>) obj) {
-                        lore.add(color.transalate(nestedLine));
-                    }
-                }
-            }
-        }
-        return lore;
-    }
+
 
 
 
@@ -591,7 +534,7 @@ public class DiemDanh extends JavaPlugin implements Listener {
         int currentMonth = today.getMonthValue();
         int lastCheckInMonth = playerData.getInt(playerUUID + ".lastCheckInMonth", 0);
 
-        
+
         if (currentMonth != lastCheckInMonth) {
             playerData.set(playerUUID + ".checkedDays", new ArrayList<>());
             playerData.set(playerUUID + ".daysCheckedIn", 0);
@@ -601,7 +544,7 @@ public class DiemDanh extends JavaPlugin implements Listener {
         List<Integer> missedDays = playerData.getIntegerList(playerUUID + ".missedDays");
         List<Integer> checkedDays = playerData.getIntegerList(playerUUID + ".checkedDays");
 
-        
+
         for (int day = 1; day < today.getDayOfMonth(); day++) {
             if (!checkedDays.contains(day) && !missedDays.contains(day)) {
                 missedDays.add(day);
@@ -618,12 +561,6 @@ public class DiemDanh extends JavaPlugin implements Listener {
         return day == today.getDayOfMonth();
     }
 
-    private boolean hasPlayerCheckedInToday(String playerUUID, int day) {
-        LocalDate lastCheckInDate = LocalDate.parse(playerData.getString(playerUUID + ".lastCheckIn", "1970-01-01"));
-        return lastCheckInDate.getYear() == LocalDate.now().getYear() &&
-                lastCheckInDate.getMonth() == LocalDate.now().getMonth() &&
-                lastCheckInDate.getDayOfMonth() == day;
-    }
 
     private void markPlayerCheckedIn(String playerUUID, int day) {
         LocalDate today = LocalDate.now();
@@ -675,21 +612,6 @@ public class DiemDanh extends JavaPlugin implements Listener {
     }
 
 
-
-    private void markPlayerMissedCheckIn(String playerUUID, int day) {
-        int currentMonth = LocalDate.now().getMonthValue();
-        int lastCheckInMonth = playerData.getInt(playerUUID + ".lastCheckInMonth", 0);
-
-        if (currentMonth == lastCheckInMonth) {
-
-            List<Integer> missedDays = playerData.getIntegerList(playerUUID + ".missedDays");
-            if (!missedDays.contains(day)) {
-                missedDays.add(day);
-                playerData.set(playerUUID + ".missedDays", missedDays);
-                savePlayerData();
-            }
-        }
-    }
 
     private void savePlayerData() {
         try {
