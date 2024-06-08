@@ -78,15 +78,14 @@ public class DiemDanh extends JavaPlugin implements Listener {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (cmd.getName().equalsIgnoreCase("diemdanh")) {
-            if (!(sender instanceof Player)) {
-                sender.sendMessage(notPlayerMessage);
-                return true;
+            Player player = null;
+            if (sender instanceof Player) {
+                player = (Player) sender;
             }
-            Player player = (Player) sender;
 
             if (args.length == 1 && args[0].equalsIgnoreCase("reload")) {
-                if (!player.hasPermission("diemdanh.reload")) {
-                    player.sendMessage(noPermissionMessage);
+                if (!sender.hasPermission("diemdanh.reload")) {
+                    sender.sendMessage(noPermissionMessage);
                     return true;
                 }
 
@@ -173,6 +172,10 @@ public class DiemDanh extends JavaPlugin implements Listener {
 
 
             } else if (args.length == 0) {
+                if (player == null) { 
+                    sender.sendMessage(notPlayerMessage);
+                    return true;
+                }
                 openDiemDanhGUI(player);
                 return true;
             } else {
@@ -234,7 +237,6 @@ public class DiemDanh extends JavaPlugin implements Listener {
         String titleWithMonth = guiTitle.replace("<month>", String.valueOf(today.getMonthValue()));
         Inventory gui = Bukkit.createInventory(null, 45, titleWithMonth);
 
-        updateMissedDays(playerUUID);
 
 
         ConfigurationSection daysSection = getConfig().getConfigurationSection("Days");
@@ -586,20 +588,30 @@ public class DiemDanh extends JavaPlugin implements Listener {
     }
     private void updateMissedDays(String playerUUID) {
         LocalDate today = LocalDate.now();
+        int currentMonth = today.getMonthValue();
         int lastCheckInMonth = playerData.getInt(playerUUID + ".lastCheckInMonth", 0);
 
-        if (today.getMonthValue() != lastCheckInMonth || !playerData.contains(playerUUID + ".missedDays")) {
-            List<Integer> missedDays = new ArrayList<>();
-            for (int day = 1; day < today.getDayOfMonth(); day++) {
-                if (!hasPlayerCheckedInToday(playerUUID, day)) {
-                    missedDays.add(day);
-                }
-            }
-            playerData.set(playerUUID + ".missedDays", missedDays);
-            playerData.set(playerUUID + ".lastCheckInMonth", today.getMonthValue());
-            savePlayerData();
+        
+        if (currentMonth != lastCheckInMonth) {
+            playerData.set(playerUUID + ".checkedDays", new ArrayList<>());
+            playerData.set(playerUUID + ".daysCheckedIn", 0);
+            playerData.set(playerUUID + ".lastCheckInMonth", currentMonth);
         }
+
+        List<Integer> missedDays = playerData.getIntegerList(playerUUID + ".missedDays");
+        List<Integer> checkedDays = playerData.getIntegerList(playerUUID + ".checkedDays");
+
+        
+        for (int day = 1; day < today.getDayOfMonth(); day++) {
+            if (!checkedDays.contains(day) && !missedDays.contains(day)) {
+                missedDays.add(day);
+            }
+        }
+
+        playerData.set(playerUUID + ".missedDays", missedDays);
+        savePlayerData();
     }
+
 
     private boolean isToday(int day) {
         LocalDate today = LocalDate.now();
