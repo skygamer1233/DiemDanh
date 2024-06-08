@@ -4,14 +4,17 @@ import net.md_5.bungee.api.ChatColor;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
 public class color {
-    public static String transalate(String str) {
-        return ChatColor.translateAlternateColorCodes('&', str);
+    public static String transalate(String message) {
+
+        String translatedMessage = translateHexColorCodes(message);
+
+
+        return ChatColor.translateAlternateColorCodes('&', translatedMessage);
     }
 
-    public static String translateHexColorCodes(String message) {
-        final Pattern hexPattern = Pattern.compile("#([A-Fa-f0-9]{6})");
+    private static String translateHexColorCodes(String message) {
+        final Pattern hexPattern = Pattern.compile("&#([A-Fa-f0-9]{6})"); // Sửa biểu thức chính quy
         Matcher matcher = hexPattern.matcher(message);
         StringBuffer buffer = new StringBuffer(message.length() + 4 * 8);
         while (matcher.find()) {
