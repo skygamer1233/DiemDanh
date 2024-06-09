@@ -1,4 +1,4 @@
-Title: "&b&lĐiểm Danh Tháng <month>" # Title của GUI
+Title: "&#FB0808Đ&#FB1A14i&#FA2B20ể&#FA3D2Bm &#F96043D&#F8714Fa&#F8835Bn&#F89466h &#F7B77ET&#F6C98Ah&#F6DA95á&#F5ECA1n&#F5FDADg <month>" # Title của GUI
 Item:
   NgayDiemDanh:  # Icon khi chưa tới ngày điểm danh
     ID: GRAY_STAINED_GLASS_PANE
@@ -457,6 +457,8 @@ Message:
   SyntaxError: "&cLỗi cú pháp"
   TichLuySuccess: "&aBạn đã nhận quà tích lũy %days% ngày thành công!"
   SpecialDaySuccess: "&aBạn đã điểm danh thành công ngày lễ %specialDay%!"
+  ChuaDiemDanhHomNay: "&cBạn chưa điểm danh ngày hôm nay. &e[Nhấn vào đây]&c để mở bảng điểm danh."
+  Hover: "&aMở Bảng Điểm Danh"
   Reload: "&aNạp lại config thành công!"
   GiveTicketSuccess: "&aĐã thêm %amount% ticket cho %player%!"
   ReceiveTicket: "&aBạn đã nhận được %amount% ticket điểm danh bù!"
