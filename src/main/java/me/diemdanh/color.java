@@ -14,7 +14,7 @@ public class color {
     }
 
     private static String translateHexColorCodes(String message) {
-        final Pattern hexPattern = Pattern.compile("&#([A-Fa-f0-9]{6})"); // Sửa biểu thức chính quy
+        final Pattern hexPattern = Pattern.compile("&#([A-Fa-f0-9]{6})"); 
         Matcher matcher = hexPattern.matcher(message);
         StringBuffer buffer = new StringBuffer(message.length() + 4 * 8);
         while (matcher.find()) {
