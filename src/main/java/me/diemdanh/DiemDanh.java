@@ -1,11 +1,8 @@
 package me.diemdanh;
 
-import me.diemdanh.color;
 import com.cryptomorin.xseries.XMaterial;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -20,37 +17,26 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.configuration.InvalidConfigurationException;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
+
 
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.logging.Level;
 
 public class DiemDanh extends JavaPlugin implements Listener {
 
-    private FileConfiguration playerData;
-    private File playerDataFile;
+    public FileConfiguration playerData;
+    public File playerDataFile;
 
-    private String diemDanhMessage;
-    private String daDiemDanhMessage;
-    private String ngayDiemDanhMessage;
-    private String chuaDiemDanhMessage;
-    private String notRequireMessage;
-    private String notPlayerMessage;
-    private String noPermissionMessage;
-    private String isClaimedMessage;
-    private String claimingMessage;
-    private String reloadMessage;
-    private String syntaxErrorMessage;
-    private String guiTitle;
+
+    public String guiTitle;
 
 
 
@@ -58,19 +44,15 @@ public class DiemDanh extends JavaPlugin implements Listener {
     public void onEnable() {
         saveDefaultConfig();
         getServer().getPluginManager().registerEvents(this, this);
+        getCommand("diemdanh").setExecutor(new DiemDanhCommand(this));
+        getCommand("diemdanh").setTabCompleter(new TabComplete());
 
-        diemDanhMessage = color.transalate(getConfig().getString("Message.DiemDanh", "&aBạn đã điểm danh thành công ngày %day%!"));
-        daDiemDanhMessage = color.transalate(getConfig().getString("Message.DaDiemDanh", "&cBạn đã điểm danh ngày này rồi!"));
-        ngayDiemDanhMessage = color.transalate(getConfig().getString("Message.NgayDiemDanh", "&cNgày %day% chưa tới!"));
-        chuaDiemDanhMessage = color.transalate(getConfig().getString("Message.ChuaDiemDanh", "&cBạn đã bỏ lỡ ngày %day%!"));
-        notRequireMessage = color.transalate(getConfig().getString("Message.NotRequire", "&cBạn không đủ số ngày yêu cầu!"));
-        notPlayerMessage = color.transalate(getConfig().getString("Message.NotPlayer", "&cBạn không phải là người chơi!"));
-        noPermissionMessage = color.transalate(getConfig().getString("Message.NoPermission", "&cBạn không có quyền để sử dụng lệnh này!"));
-        isClaimedMessage = color.transalate(getConfig().getString("Message.IsClaimed", "&cBạn đã nhận quà này rồi!"));
-        claimingMessage = color.transalate(getConfig().getString("Message.Claiming", "&aHôm nay bạn chưa điểm danh, bấm /diemdanh để điểm danh"));
-        syntaxErrorMessage = color.transalate(getConfig().getString("Message.SyntaxError", "&cLỗi cú pháp"));
+        this.getServer().getConsoleSender().sendMessage(color.transalate("&7--------------------------------------"));
+        this.getServer().getConsoleSender().sendMessage(color.transalate("&eDiemDanh Reloaded&a has been enabled"));
+        this.getServer().getConsoleSender().sendMessage(color.transalate("&8Plugin by SkyGamer"));
+        this.getServer().getConsoleSender().sendMessage(color.transalate("&7--------------------------------------"));
+
         guiTitle = color.transalate(getConfig().getString("Title", "&a&lĐiểm Danh Tháng "));
-        reloadMessage = color.transalate(getConfig().getString("Message.Reload", "&aNạp lại config thành công!"));
 
         playerDataFile = new File(getDataFolder(), "playerdata.yml");
         if (!playerDataFile.exists()) {
@@ -78,97 +60,18 @@ public class DiemDanh extends JavaPlugin implements Listener {
         }
         playerData = YamlConfiguration.loadConfiguration(playerDataFile);
     }
-
-    @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if (cmd.getName().equalsIgnoreCase("diemdanh")) {
-            Player player = null;
-            if (sender instanceof Player) {
-                player = (Player) sender;
-            }
-
-            if (args.length == 1 && args[0].equalsIgnoreCase("reload")) {
-                if (!sender.hasPermission("diemdanh.reload")) {
-                    sender.sendMessage(noPermissionMessage);
-                    return true;
-                }
-
-                File configFile = new File(getDataFolder(), "config.yml");
-                if (!configFile.exists()) {
-                    saveDefaultConfig();
-                    configFile = new File(getDataFolder(), "config.yml");
-                }
-                try {
-                    getConfig().load(configFile);
-                } catch (IOException | InvalidConfigurationException e) {
-                    player.sendMessage(color.transalate("&cLỗi khi tải lại config!"));
-                    e.printStackTrace();
-                    return true;
-                }
-
-                playerDataFile = new File(getDataFolder(), "playerdata.yml");
-                if (!playerDataFile.exists()) {
-                    saveResource("playerdata.yml", false);
-                }
-                playerData = YamlConfiguration.loadConfiguration(playerDataFile);
-
-                sender.sendMessage(reloadMessage);
-                return true;
-            } else if (args.length == 3 && args[0].equalsIgnoreCase("giveticket")) {
-                if (!sender.hasPermission("diemdanh.giveticket")) {
-                    sender.sendMessage(noPermissionMessage);
-                    return true;
-                }
-
-                Player targetPlayer = Bukkit.getPlayer(args[1]);
-                if (targetPlayer == null) {
-                    sender.sendMessage(getMessage("PlayerNotFound"));
-                    return true;
-                }
-
-                int amount;
-                try {
-                    amount = Integer.parseInt(args[2]);
-                    if (amount <= 0) {
-                        sender.sendMessage(getMessage("InvalidTicketAmount"));
-                        return true;
-                    }
-                } catch (NumberFormatException e) {
-                    sender.sendMessage(getMessage("InvalidTicketAmount"));
-                    return true;
-                }
-
-                String targetPlayerUUID = targetPlayer.getUniqueId().toString();
-                int currentTickets = playerData.getInt(targetPlayerUUID + ".tickets", 0);
-                playerData.set(targetPlayerUUID + ".tickets", currentTickets + amount);
-                savePlayerData();
-
-                String giveTicketSuccessMessage = getMessage("GiveTicketSuccess")
-                        .replace("%amount%", String.valueOf(amount))
-                        .replace("%player%", targetPlayer.getName());
-                sender.sendMessage(giveTicketSuccessMessage);
-
-                String receiveTicketMessage = getMessage("ReceiveTicket")
-                        .replace("%amount%", String.valueOf(amount));
-                targetPlayer.sendMessage(receiveTicketMessage);
-
-                return true;
-
-            } else if (args.length == 0 && sender instanceof Player) {
-                openDiemDanhGUI((Player) sender);
-                return true;
-
-            } else {
-                player.sendMessage(syntaxErrorMessage);
-                return true;
-            }
-        }
-        return false;
+    public void onDisable() {
+        this.getServer().getConsoleSender().sendMessage(color.transalate("&7--------------------------------------"));
+        this.getServer().getConsoleSender().sendMessage(color.transalate("&eDiemDanh Reloaded&a has been disabled"));
+        this.getServer().getConsoleSender().sendMessage(color.transalate("&8Plugin by SkyGamer"));
+        this.getServer().getConsoleSender().sendMessage(color.transalate("&7--------------------------------------"));
     }
 
 
 
-    private void openDiemDanhGUI(Player player) {
+
+
+    public void openDiemDanhGUI(Player player) {
         LocalDate today = LocalDate.now();
         String playerUUID = player.getUniqueId().toString();
         String titleWithMonth = guiTitle.replace("<month>", String.valueOf(today.getMonthValue()));
@@ -214,7 +117,7 @@ public class DiemDanh extends JavaPlugin implements Listener {
             }
 
             List<String> lore = new ArrayList<>();
-            if (day - 1 < dayEntries.size()) { 
+            if (day - 1 < dayEntries.size()) {
                 Object dayEntry = dayEntries.get(day - 1);
                 if (dayEntry instanceof ConfigurationSection) {
                     ConfigurationSection daySection = (ConfigurationSection) dayEntry;
@@ -304,6 +207,7 @@ public class DiemDanh extends JavaPlugin implements Listener {
             meta.addEnchant(Enchantment.DURABILITY, 1, true);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         }
+
         item.setItemMeta(meta);
         return item;
     }
@@ -318,7 +222,7 @@ public class DiemDanh extends JavaPlugin implements Listener {
     public void onInventoryClick(InventoryClickEvent event) {
         if (!event.getView().getTitle().equals(guiTitle.replace("<month>", String.valueOf(LocalDate.now().getMonthValue())))) return;
         if (!(event.getWhoClicked() instanceof Player)) {
-            event.getWhoClicked().sendMessage(notPlayerMessage);
+            event.getWhoClicked().sendMessage(getMessage("NotPlayer"));
             return;
         }
 
@@ -376,21 +280,21 @@ public class DiemDanh extends JavaPlugin implements Listener {
                     markPlayerCheckedIn(playerUUID, slot + 1);
 
                     savePlayerData();
-                    player.sendMessage(diemDanhMessage.replace("%day%", String.valueOf(slot + 1)));
+                    player.sendMessage(getMessage("DiemDanh").replace("%day%", String.valueOf(slot + 1)));
                 } else {
-                    player.sendMessage(notRequireMessage);
+                    player.sendMessage(getMessage("NotRequire"));
                 }
             } else if (originalItemKey.equals("ChuaDiemDanh")) {
-                player.sendMessage(isToday(slot + 1) ? claimingMessage : chuaDiemDanhMessage.replace("%day%", String.valueOf(slot + 1)));
+                player.sendMessage(isToday(slot + 1) ? getMessage("Claiming") : getMessage("ChuaDiemDanh").replace("%day%", String.valueOf(slot + 1)));
             } else if (specialDayKey != null && originalItemKey.equals("DaDiemDanh")) {
                 player.sendMessage(color.transalate(getConfig().getString("Message.SpecialDayDaDiemDanh", "&cBạn đã điểm danh ngày lễ này rồi!")));
             } else if (originalItemKey.equals("DaDiemDanh")) {
-                player.sendMessage(daDiemDanhMessage);
+                player.sendMessage(getMessage("DaDiemDanh"));
             } else {
                 String dayName = (specialDayKey != null)
                         ? getConfig().getString("SpecialDay." + specialDayKey + ".Icon.NgayDiemDanh.Name", specialDayKey)
                         : String.valueOf(slot + 1);
-                player.sendMessage(ngayDiemDanhMessage.replace("%day%", dayName));
+                player.sendMessage(getMessage("NgayDiemDanh").replace("%day%", dayName));
             }
         } else if (slot >= 36 && slot <= 38) {
             originalItemKey = getTichLuyItemKey(playerUUID, (slot - 36 + 1) * 7);
@@ -404,9 +308,9 @@ public class DiemDanh extends JavaPlugin implements Listener {
                     player.sendMessage(color.transalate(getConfig().getString("Message.TichLuySuccess", "&aBạn đã nhận quà tích lũy %days% ngày thành công!").replace("%days%", String.valueOf((slot - 36 + 1) * 7))));
                 }
             } else if (originalItemKey.equals("DaNhanQua")) {
-                player.sendMessage(isClaimedMessage);
+                player.sendMessage(getMessage("IsClaimed"));
             } else {
-                player.sendMessage(notRequireMessage);
+                player.sendMessage(getMessage("NotRequire"));
             }
         }
 
@@ -417,16 +321,6 @@ public class DiemDanh extends JavaPlugin implements Listener {
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replace("<player>", player.getName()));
         }
     }
-
-
-
-
-
-
-
-
-
-
 
     private String getItemKeyForDay(int day, String playerUUID) {
         LocalDate today = LocalDate.now();
@@ -442,9 +336,6 @@ public class DiemDanh extends JavaPlugin implements Listener {
             return "DiemDanh";
         }
     }
-
-
-
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
@@ -567,7 +458,7 @@ public class DiemDanh extends JavaPlugin implements Listener {
         savePlayerData();
     }
 
-    private void savePlayerData() {
+    public void savePlayerData() {
         try {
             playerData.save(playerDataFile);
         } catch (IOException e) {
@@ -598,7 +489,7 @@ public class DiemDanh extends JavaPlugin implements Listener {
         }
     }
 
-    private String getMessage(String key) {
+    public String getMessage(String key) {
         String message = getConfig().getString("Message." + key, "&cMessage not found: " + key);
         return color.transalate(message);
     }
@@ -641,7 +532,4 @@ public class DiemDanh extends JavaPlugin implements Listener {
             return "NgayDiemDanh";
         }
     }
-
-
-
 }
