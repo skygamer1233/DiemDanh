@@ -15,6 +15,7 @@ public class DiemDanhCommand implements CommandExecutor {
 
     private final DiemDanh plugin;
 
+
     public DiemDanhCommand(DiemDanh plugin) {
         this.plugin = plugin;
     }
@@ -33,7 +34,7 @@ public class DiemDanhCommand implements CommandExecutor {
                     return true;
                 }
 
-                // Tải lại config từ file
+
                 File configFile = new File(plugin.getDataFolder(), "config.yml");
                 if (!configFile.exists()) {
                     plugin.saveDefaultConfig();
@@ -53,6 +54,20 @@ public class DiemDanhCommand implements CommandExecutor {
                     plugin.saveResource("playerdata.yml", false);
                 }
                 plugin.playerData = YamlConfiguration.loadConfiguration(plugin.playerDataFile);
+
+                plugin.topGuiFile = new File(plugin.getDataFolder(), "topgui.yml");
+                if (!plugin.topGuiFile.exists()) {
+                    plugin.saveResource("topgui.yml", false);
+                    plugin.topGuiFile = new File(plugin.getDataFolder(), "topgui.yml");
+                }
+                try {
+                    plugin.topGuiConfig = YamlConfiguration.loadConfiguration(plugin.topGuiFile);
+                    plugin.topGuiTitle = color.transalate(plugin.topGuiConfig.getString("TopTitle", "&c&lBảng Xếp Hạng Điểm Danh Tháng <month>"));
+                } catch (RuntimeException e) {
+                    sender.sendMessage(color.transalate("&cLỗi khi tải lại topgui.yml!"));
+                    e.printStackTrace();
+                    return true;
+                }
 
                 sender.sendMessage(plugin.getMessage("Reload"));
                 return true;
@@ -95,6 +110,13 @@ public class DiemDanhCommand implements CommandExecutor {
                 targetPlayer.sendMessage(receiveTicketMessage);
 
                 return true;
+            } else if (args.length == 1 && args[0].equalsIgnoreCase("top")) { // Xử lý lệnh /diemdanh top
+                if (player == null) {
+                    sender.sendMessage(plugin.getMessage("NotPlayer"));
+                    return true;
+                }
+                plugin.getDiemDanhTop().openTopDiemDanhGUI(player); // Gọi hàm openTopDiemDanhGUI
+                return true;
             } else if (args.length == 0 && sender instanceof Player) {
                 plugin.openDiemDanhGUI((Player) sender);
                 return true;
@@ -105,4 +127,5 @@ public class DiemDanhCommand implements CommandExecutor {
         }
         return false;
     }
+
 }
