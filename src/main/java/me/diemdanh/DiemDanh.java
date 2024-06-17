@@ -34,9 +34,13 @@ public class DiemDanh extends JavaPlugin implements Listener {
 
     public FileConfiguration playerData;
     public File playerDataFile;
+    public DiemDanhTop diemDanhTop;
+    public String topGuiTitle;
 
 
     public String guiTitle;
+    public FileConfiguration topGuiConfig;
+    public File topGuiFile;
 
 
 
@@ -46,6 +50,10 @@ public class DiemDanh extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(this, this);
         getCommand("diemdanh").setExecutor(new DiemDanhCommand(this));
         getCommand("diemdanh").setTabCompleter(new TabComplete());
+        diemDanhTop = new DiemDanhTop(this);
+        getServer().getPluginManager().registerEvents(diemDanhTop.new TopGUIListener(), this);
+
+
 
         this.getServer().getConsoleSender().sendMessage(color.transalate("&7--------------------------------------"));
         this.getServer().getConsoleSender().sendMessage(color.transalate("&eDiemDanh Reloaded&a has been enabled"));
@@ -53,6 +61,16 @@ public class DiemDanh extends JavaPlugin implements Listener {
         this.getServer().getConsoleSender().sendMessage(color.transalate("&7--------------------------------------"));
 
         guiTitle = color.transalate(getConfig().getString("Title", "&a&lĐiểm Danh Tháng "));
+
+        topGuiFile = new File(getDataFolder(), "topgui.yml");
+        if (!topGuiFile.exists()) {
+            saveResource("topgui.yml", false);
+        }
+        topGuiConfig = YamlConfiguration.loadConfiguration(topGuiFile);
+
+        topGuiTitle = color.transalate(topGuiConfig.getString("TopTitle", "&c&lBảng Xếp Hạng Điểm Danh Tháng <month>"));
+
+
 
         playerDataFile = new File(getDataFolder(), "playerdata.yml");
         if (!playerDataFile.exists()) {
@@ -65,6 +83,12 @@ public class DiemDanh extends JavaPlugin implements Listener {
         this.getServer().getConsoleSender().sendMessage(color.transalate("&eDiemDanh Reloaded&a has been disabled"));
         this.getServer().getConsoleSender().sendMessage(color.transalate("&8Plugin by SkyGamer"));
         this.getServer().getConsoleSender().sendMessage(color.transalate("&7--------------------------------------"));
+    }
+    public DiemDanhTop getDiemDanhTop() {
+        return diemDanhTop;
+    }
+    public String getTopGuiTitle() {
+        return topGuiTitle;
     }
 
 
