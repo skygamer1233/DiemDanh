@@ -6,6 +6,9 @@ import java.util.regex.Pattern;
 
 public class color {
     public static String transalate(String message) {
+        if (message == null || message.isEmpty()) {
+            return "";
+        }
 
         String translatedMessage = translateHexColorCodes(message);
 
@@ -14,7 +17,7 @@ public class color {
     }
 
     private static String translateHexColorCodes(String message) {
-        final Pattern hexPattern = Pattern.compile("&#([A-Fa-f0-9]{6})"); 
+        final Pattern hexPattern = Pattern.compile("&#([A-Fa-f0-9]{6})");
         Matcher matcher = hexPattern.matcher(message);
         StringBuffer buffer = new StringBuffer(message.length() + 4 * 8);
         while (matcher.find()) {
