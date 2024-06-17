@@ -1,27 +1,23 @@
 name: DiemDanh
-version: '1.3-HOTFIX'
+version: '1.4-BETA'
 main: me.diemdanh.DiemDanh
 api-version: '1.13'
 commands:
   diemdanh:
     description: Mở GUI điểm danh hàng ngày
-    usage: /diemdanh
+    usage: /diemdanh [reload] [giveticket <player> <amount>]
     permission: diemdanh.use
-  diemdanh reload:
-    description: Nạp lại config
-    usage: /diemdanh reload
-    permission: diemdanh.reload
-  diemdanh giveticket:
-    description: Gửi phiếu điểm danh bù cho player
-    usage: /diemdanh giveticket <player> <ammount>
-    permission: diemdanh.giveticket
 permissions:
   diemdanh.use:
     description: Cho phép người chơi sử dụng lệnh /diemdanh
     default: true
+  diemdanh.top:
+    description: Cho phép người chơi sử dụng lệnh /diemdanh top
+    default: true
   diemdanh.reload:
     description: Cho phép người chơi sử dụng lệnh /diemdanh reload
-    default: op  # Chỉ op mới có quyền reload mặc định
+    default: op
   diemdanh.giveticket:
     description: Cho phép người chơi sử dụng lệnh /diemdanh giveticket
     default: op
+softdepend: [HeadDatabase]
