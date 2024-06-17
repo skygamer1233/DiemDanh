@@ -6,7 +6,7 @@
 
   <groupId>me</groupId>
   <artifactId>DiemDanh</artifactId>
-  <version>1.3-HOTFIX</version>
+  <version>1.4-BETA</version>
   <packaging>jar</packaging>
 
   <name>DiemDanh</name>
