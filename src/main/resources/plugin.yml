@@ -1,5 +1,5 @@
 name: DiemDanh
-version: '1.4-BETA'
+version: ${project.version}
 main: me.diemdanh.DiemDanh
 api-version: '1.13'
 commands:
