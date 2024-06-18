@@ -42,6 +42,7 @@ public class DiemDanhCommand implements CommandExecutor {
                 }
                 try {
                     plugin.getConfig().load(configFile);
+                    plugin.guiTitle = color.transalate(plugin.getConfig().getString("Title", "&a&lĐiểm Danh Tháng <month>"));
                 } catch (IOException | InvalidConfigurationException e) {
                     sender.sendMessage(color.transalate("&cLỗi khi tải lại config!"));
                     e.printStackTrace();
