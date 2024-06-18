@@ -60,7 +60,7 @@ public class DiemDanh extends JavaPlugin implements Listener {
         this.getServer().getConsoleSender().sendMessage(color.transalate("&8Plugin by SkyGamer"));
         this.getServer().getConsoleSender().sendMessage(color.transalate("&7--------------------------------------"));
 
-        guiTitle = color.transalate(getConfig().getString("Title", "&a&lĐiểm Danh Tháng "));
+        guiTitle = color.transalate(getConfig().getString("Title", "&a&lĐiểm Danh Tháng <month>"));
 
         topGuiFile = new File(getDataFolder(), "topgui.yml");
         if (!topGuiFile.exists()) {
@@ -169,7 +169,9 @@ public class DiemDanh extends JavaPlugin implements Listener {
             String name = color.transalate(itemSection.getString("Name").replace("<date>", String.valueOf(day)));
             boolean glow = itemSection.getBoolean("Glow");
 
-            ItemStack item = new ItemStack(material, 1);
+            int itemAmount = day;
+
+            ItemStack item = new ItemStack(material, itemAmount);
             ItemMeta meta = item.getItemMeta();
             meta.setDisplayName(name);
             meta.setLore(translatedLore);
