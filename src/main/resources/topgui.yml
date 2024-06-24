@@ -1,11 +1,13 @@
 TopTitle: "&c&lBảng Xếp Hạng Điểm Danh Tháng <month>" # Title của GUI
+TotalTitle: "&c&lBảng Xếp Hạng Điểm Danh Tổng" # Title của GUI
+version: 1
 ItemTops:
-  Top1:
+  Top:
     Icon:
       HavePlayer:
         ID: PLAYER_HEAD
         Data: 0
-        Name: "&aTop 1: &c<player_name>"
+        Name: "&aTop <top>: &c<player_name>"
         Lore:
           - "&aĐã điểm danh được : &e<days> &angày"
           - "&f"
@@ -20,174 +22,14 @@ ItemTops:
           - "&f"
           - "&f"
         Glow: false
-  Top2:
+  Total:
     Icon:
       HavePlayer:
         ID: PLAYER_HEAD
         Data: 0
-        Name: "&aTop 2: &c<player_name>"
+        Name: "&aTop <top>: &c<player_name>"
         Lore:
-          - "&aĐã điểm danh được : &e<days> &angày"
-          - "&f"
-          - "&f"
-        Glow: true
-      NoPlayer:
-        ID: PLAYER_HEAD
-        Data: 0
-        Name: "&eChưa Có"
-        Lore:
-          - "&fHiện chưa có ai giành top này"
-          - "&f"
-          - "&f"
-        Glow: false
-  Top3:
-    Icon:
-      HavePlayer:
-        ID: PLAYER_HEAD
-        Data: 0
-        Name: "&aTop 3: &c<player_name>"
-        Lore:
-          - "&aĐã điểm danh được : &e<days> &angày"
-          - "&f"
-          - "&f"
-        Glow: true
-      NoPlayer:
-        ID: PLAYER_HEAD
-        Data: 0
-        Name: "&eChưa Có"
-        Lore:
-          - "&fHiện chưa có ai giành top này"
-          - "&f"
-          - "&f"
-        Glow: false
-  Top4:
-    Icon:
-      HavePlayer:
-        ID: PLAYER_HEAD
-        Data: 0
-        Name: "&aTop 4: &c<player_name>"
-        Lore:
-          - "&aĐã điểm danh được : &e<days> &angày"
-          - "&f"
-          - "&f"
-        Glow: true
-      NoPlayer:
-        ID: PLAYER_HEAD
-        Data: 0
-        Name: "&eChưa Có"
-        Lore:
-          - "&fHiện chưa có ai giành top này"
-          - "&f"
-          - "&f"
-        Glow: false
-  Top5:
-    Icon:
-      HavePlayer:
-        ID: PLAYER_HEAD
-        Data: 0
-        Name: "&aTop 5: &c<player_name>"
-        Lore:
-          - "&aĐã điểm danh được : &e<days> &angày"
-          - "&f"
-          - "&f"
-        Glow: true
-      NoPlayer:
-        ID: PLAYER_HEAD
-        Data: 0
-        Name: "&eChưa Có"
-        Lore:
-          - "&fHiện chưa có ai giành top này"
-          - "&f"
-          - "&f"
-        Glow: false
-  Top6:
-    Icon:
-      HavePlayer:
-        ID: PLAYER_HEAD
-        Data: 0
-        Name: "&aTop 6: &c<player_name>"
-        Lore:
-          - "&aĐã điểm danh được : &e<days> &angày"
-          - "&f"
-          - "&f"
-        Glow: true
-      NoPlayer:
-        ID: PLAYER_HEAD
-        Data: 0
-        Name: "&eChưa Có"
-        Lore:
-          - "&fHiện chưa có ai giành top này"
-          - "&f"
-          - "&f"
-        Glow: false
-  Top7:
-    Icon:
-      HavePlayer:
-        ID: PLAYER_HEAD
-        Data: 0
-        Name: "&aTop 7: &c<player_name>"
-        Lore:
-          - "&aĐã điểm danh được : &e<days> &angày"
-          - "&f"
-          - "&f"
-        Glow: true
-      NoPlayer:
-        ID: PLAYER_HEAD
-        Data: 0
-        Name: "&eChưa Có"
-        Lore:
-          - "&fHiện chưa có ai giành top này"
-          - "&f"
-          - "&f"
-        Glow: false
-  Top8:
-    Icon:
-      HavePlayer:
-        ID: PLAYER_HEAD
-        Data: 0
-        Name: "&aTop 8: &c<player_name>"
-        Lore:
-          - "&aĐã điểm danh được : &e<days> &angày"
-          - "&f"
-          - "&f"
-        Glow: true
-      NoPlayer:
-        ID: PLAYER_HEAD
-        Data: 0
-        Name: "&eChưa Có"
-        Lore:
-          - "&fHiện chưa có ai giành top này"
-          - "&f"
-          - "&f"
-        Glow: false
-  Top9:
-    Icon:
-      HavePlayer:
-        ID: PLAYER_HEAD
-        Data: 0
-        Name: "&aTop 9: &c<player_name>"
-        Lore:
-          - "&aĐã điểm danh được : &e<days> &angày"
-          - "&f"
-          - "&f"
-        Glow: true
-      NoPlayer:
-        ID: PLAYER_HEAD
-        Data: 0
-        Name: "&eChưa Có"
-        Lore:
-          - "&fHiện chưa có ai giành top này"
-          - "&f"
-          - "&f"
-        Glow: false
-  Top10:
-    Icon:
-      HavePlayer:
-        ID: PLAYER_HEAD
-        Data: 0
-        Name: "&aTop 10: &c<player_name>"
-        Lore:
-          - "&aĐã điểm danh được : &e<days> &angày"
+          - "&aĐã điểm danh được : &e<totaldays> &angày"
           - "&f"
           - "&f"
         Glow: true
@@ -207,5 +49,19 @@ ItemTops:
     Lore:
       - "&f"
     Glow: true
+  NextPage:
+    ID: BOOK
+    Data: 0
+    Name: "&aTrang Sau"
+    Lore:
+      - "&f"
+    Glow: true
+  PrevPage:
+    ID: BOOK
+    Data: 0
+    Name: "&aTrang Trước"
+    Lore:
+      - "&f"
+    Glow: false
 
 

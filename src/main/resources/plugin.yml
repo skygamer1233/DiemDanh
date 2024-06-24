@@ -1,5 +1,5 @@
-name: ${project.name}
-version: ${project.version}
+name: DiemDanh
+version: '1.4-BETA'
 main: me.diemdanh.DiemDanh
 api-version: '1.13'
 commands:
@@ -20,4 +20,3 @@ permissions:
   diemdanh.giveticket:
     description: Cho phép người chơi sử dụng lệnh /diemdanh giveticket
     default: op
-softdepend: [HeadDatabase]

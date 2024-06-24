@@ -1,4 +1,6 @@
-Title: "&#FB0808Đ&#FB1A14i&#FA2B20ể&#FA3D2Bm &#F96043D&#F8714Fa&#F8835Bn&#F89466h &#F7B77ET&#F6C98Ah&#F6DA95á&#F5ECA1n&#F5FDADg <month>" # Title của GUI
+Title: "&b&lĐiểm Danh Tháng <month>" # Title của GUI
+version: 1
+language: vi
 Item:
   NgayDiemDanh:  # Icon khi chưa tới ngày điểm danh
     ID: GRAY_STAINED_GLASS_PANE
@@ -31,7 +33,7 @@ Item:
     Name: "&e&lThông tin điểm danh"
     Lore:
       - "&aSố ngày tích lũy trong tháng: <days>"
-      - "  "
+      - "&aTổng số ngày điểm danh: <totaldays>"
       - "&cPlugin Rebuilt by SkyGamer"
     Glow: true
   Ticket:
@@ -444,24 +446,3 @@ SpecialDay:
     Reward:
       - give <player> grass 1
 
-Message:
-  DiemDanh: "&aBạn đã điểm danh thành công ngày %day%!"
-  DaDiemDanh: "&cBạn đã điểm danh ngày này rồi!"
-  NgayDiemDanh: "&cNgày %day% chưa tới!"
-  ChuaDiemDanh: "&cBạn đã bỏ lỡ ngày %day%!"
-  NotRequire: "&cBạn không đủ số ngày yêu cầu!"
-  NotPlayer: "&cBạn không phải là người chơi!"
-  NoPermission: "&cBạn không có quyền để sử dụng lệnh này!"
-  IsClaimed: "&cBạn đã nhận quà này rồi!"
-  Claiming: "&aHôm nay bạn chưa điểm danh, bấm /diemdanh để điểm danh"
-  SyntaxError: "&cLỗi cú pháp"
-  TichLuySuccess: "&aBạn đã nhận quà tích lũy %days% ngày thành công!"
-  SpecialDaySuccess: "&aBạn đã điểm danh thành công ngày lễ %specialDay%!"
-  ChuaDiemDanhHomNay: "&cBạn chưa điểm danh ngày hôm nay. &e[Nhấn vào đây]&c để mở bảng điểm danh."
-  Hover: "&aMở Bảng Điểm Danh"
-  Reload: "&aNạp lại config thành công!"
-  GiveTicketSuccess: "&aĐã thêm %amount% ticket cho %player%!"
-  ReceiveTicket: "&aBạn đã nhận được %amount% ticket điểm danh bù!"
-  PlayerNotFound: "&cKhông tìm thấy người chơi!"
-  InvalidTicketAmount: "&cSố lượng ticket phải lớn hơn 0 và phải là số nguyên!"
-  SpecialDayDaDiemDanh: "&cBạn đã điểm danh ngày lễ này rồi!"
