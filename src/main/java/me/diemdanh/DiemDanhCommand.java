@@ -4,12 +4,13 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.entity.Player;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
 import java.io.IOException;
+
 
 public class DiemDanhCommand implements CommandExecutor {
 
@@ -21,7 +22,7 @@ public class DiemDanhCommand implements CommandExecutor {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (cmd.getName().equalsIgnoreCase("diemdanh")) {
             Player player = null;
             if (sender instanceof Player) {
@@ -34,41 +35,27 @@ public class DiemDanhCommand implements CommandExecutor {
                     return true;
                 }
 
+                plugin.reloadConfig();
+                plugin.guiTitle = color.transalate(plugin.getConfig().getString("Title", "&a&lĐiểm Danh Tháng "));
 
-                File configFile = new File(plugin.getDataFolder(), "config.yml");
-                if (!configFile.exists()) {
-                    plugin.saveDefaultConfig();
-                    configFile = new File(plugin.getDataFolder(), "config.yml");
-                }
                 try {
-                    plugin.getConfig().load(configFile);
-                    plugin.guiTitle = color.transalate(plugin.getConfig().getString("Title", "&a&lĐiểm Danh Tháng <month>"));
+                    plugin.playerData.load(plugin.playerDataFile);
                 } catch (IOException | InvalidConfigurationException e) {
-                    sender.sendMessage(color.transalate("&cLỗi khi tải lại config!"));
+                    sender.sendMessage(color.transalate("&cLỗi khi tải lại playerdata!"));
                     e.printStackTrace();
                     return true;
                 }
 
-
-                plugin.playerDataFile = new File(plugin.getDataFolder(), "playerdata.yml");
-                if (!plugin.playerDataFile.exists()) {
-                    plugin.saveResource("playerdata.yml", false);
-                }
-                plugin.playerData = YamlConfiguration.loadConfiguration(plugin.playerDataFile);
-
-                plugin.topGuiFile = new File(plugin.getDataFolder(), "topgui.yml");
-                if (!plugin.topGuiFile.exists()) {
-                    plugin.saveResource("topgui.yml", false);
-                    plugin.topGuiFile = new File(plugin.getDataFolder(), "topgui.yml");
-                }
                 try {
                     plugin.topGuiConfig = YamlConfiguration.loadConfiguration(plugin.topGuiFile);
                     plugin.topGuiTitle = color.transalate(plugin.topGuiConfig.getString("TopTitle", "&c&lBảng Xếp Hạng Điểm Danh Tháng <month>"));
+                    plugin.TotalTitle = color.transalate(plugin.topGuiConfig.getString("TotalTitle", "&c&lBảng Xếp Hạng Điểm Danh Tổng"));
                 } catch (RuntimeException e) {
                     sender.sendMessage(color.transalate("&cLỗi khi tải lại topgui.yml!"));
                     e.printStackTrace();
                     return true;
                 }
+                plugin.reloadLanguageFiles();
 
                 sender.sendMessage(plugin.getMessage("Reload"));
                 return true;
@@ -111,12 +98,12 @@ public class DiemDanhCommand implements CommandExecutor {
                 targetPlayer.sendMessage(receiveTicketMessage);
 
                 return true;
-            } else if (args.length == 1 && args[0].equalsIgnoreCase("top")) { // Xử lý lệnh /diemdanh top
+            } else if (args.length == 1 && args[0].equalsIgnoreCase("top")) {
                 if (player == null) {
                     sender.sendMessage(plugin.getMessage("NotPlayer"));
                     return true;
                 }
-                plugin.getDiemDanhTop().openTopDiemDanhGUI(player); // Gọi hàm openTopDiemDanhGUI
+                plugin.getDiemDanhTop().openTopDiemDanhGUI(player);
                 return true;
             } else if (args.length == 0 && sender instanceof Player) {
                 plugin.openDiemDanhGUI((Player) sender);

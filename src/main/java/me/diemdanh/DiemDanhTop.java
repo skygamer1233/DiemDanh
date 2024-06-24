@@ -48,55 +48,37 @@
                 int daysCheckedIn = entry.getValue();
 
 
-                ConfigurationSection topItemSection = plugin.topGuiConfig.getConfigurationSection("ItemTops.Top" + (index + 1) + ".Icon.HavePlayer");
-                if(topItemSection == null) {
-                    plugin.getLogger().warning("Missing configuration for Top" + (index + 1) + " in topgui.yml");
-                    continue;
+                ConfigurationSection topItemSection = plugin.topGuiConfig.getConfigurationSection("ItemTops.Top.Icon.HavePlayer");
+                if (topItemSection == null) {
+                    plugin.getLogger().warning("Missing configuration for Top in topgui.yml");
+                    return;
                 }
 
 
                 String playerName = playerUUID != null ? Bukkit.getOfflinePlayer(playerUUID).getName() : "Chưa có";
 
-                ItemStack item = createItemFromConfig(topItemSection, playerUUID.toString(), daysCheckedIn);
-                ItemMeta meta = item.getItemMeta();
-
-
-                if (playerUUID != null && item.getType() == XMaterial.PLAYER_HEAD.parseMaterial()) {
-                    SkullMeta skullMeta = (SkullMeta) meta;
-                    skullMeta.setOwningPlayer(Bukkit.getOfflinePlayer(UUID.fromString(playerUUID.toString())));
-                    skullMeta.setDisplayName(color.transalate(topItemSection.getString("Name").replace("<player_name>", playerName)));
-
-                    item.setItemMeta(skullMeta);
-                } else {
-                    String name = topItemSection.getString("Name");
-                    if (name != null) {
-                        meta.setDisplayName(color.transalate(name));
-                    }
-                    meta.setLore(getLoreFromConfig(topItemSection, "Lore"));
-                    if (topItemSection.getBoolean("Glow")) {
-                        meta.addEnchant(Enchantment.DURABILITY, 1, true);
-                        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-                    }
-                    item.setItemMeta(meta);
-                }
-
-                if (index < topPositions.length) {
-                    gui.setItem(topPositions[index], item);
-                }
+                ItemStack item = createItemFromConfig(topItemSection, playerUUID.toString(), daysCheckedIn, index + 1);
+                gui.setItem(topPositions[index], item);
 
                 index++;
+
             }
 
-            for (int i = 0; i < topPositions.length; i++) {
-                if (gui.getItem(topPositions[i]) == null) {
-                    ConfigurationSection topItemSection = plugin.topGuiConfig.getConfigurationSection("ItemTops.Top" + (i + 1) + ".Icon.NoPlayer");
-                    ItemStack item = createItemFromConfig(topItemSection, null, 0);
-                    gui.setItem(topPositions[i], item);
+            ConfigurationSection noPlayerItemSection = plugin.topGuiConfig.getConfigurationSection("ItemTops.Top.Icon.NoPlayer");
+            if (noPlayerItemSection != null) {
+                ItemStack noPlayerItem = createItemFromConfig(noPlayerItemSection, null, 0, 0);
+                for (int i = 0; i < topPositions.length; i++) {
+                    if (gui.getItem(topPositions[i]) == null) {
+                        gui.setItem(topPositions[i], noPlayerItem);
+                    }
                 }
+            } else {
+                plugin.getLogger().warning("Missing configuration for NoPlayer in topgui.yml");
             }
+
             ConfigurationSection fillItemSection = plugin.topGuiConfig.getConfigurationSection("ItemTops.FillItem");
             if (fillItemSection != null) {
-                ItemStack fillItem = createItemFromConfig(fillItemSection, null, 0);
+                ItemStack fillItem = createItemFromConfig(fillItemSection, "", 0, 0);
                 for (int i = 0; i < gui.getSize(); i++) {
                     if (gui.getItem(i) == null) {
                         gui.setItem(i, fillItem);
@@ -105,6 +87,15 @@
             } else {
                 plugin.getLogger().warning("Missing 'FillItem' section in topgui.yml");
             }
+            ConfigurationSection nextPageItemSection = plugin.topGuiConfig.getConfigurationSection("ItemTops.NextPage");
+            if (nextPageItemSection != null) {
+                ItemStack nextPageItem = createItemFromConfig(nextPageItemSection, null, 0, 0);
+                gui.setItem(53, nextPageItem);
+            } else {
+                plugin.getLogger().warning("Missing 'NextPage' section in topgui.yml");
+            }
+
+
 
 
 
@@ -112,14 +103,16 @@
         }
 
 
-        private ItemStack createItemFromConfig(ConfigurationSection topItemSection, String playerUUID, int daysCheckedIn) {
+        private ItemStack createItemFromConfig( ConfigurationSection topItemSection, String playerUUID, int daysCheckedIn, int top) {
             XMaterial xMaterial = XMaterial.matchXMaterial(topItemSection.getString("ID")).orElse(XMaterial.BARRIER);
             Material material = xMaterial.parseMaterial();
+            int totalDays = plugin.playerData.getInt(playerUUID + ".totalDays", 0);
 
             List<String> rawlore = topItemSection.getStringList("Lore");
             List<String> translatedLore = new ArrayList<>();
             for (String line : rawlore) {
                 line = line.replace("<days>", String.valueOf(daysCheckedIn));
+                line = line.replace("<totaldays>", String.valueOf(totalDays));
                 translatedLore.add(color.transalate(line));
             }
 
@@ -129,13 +122,15 @@
 
             if (playerUUID != null && material == XMaterial.PLAYER_HEAD.parseMaterial()) {
                 SkullMeta skullMeta = (SkullMeta) meta;
-                skullMeta.setOwningPlayer(Bukkit.getOfflinePlayer(UUID.fromString(playerUUID))); // Đặt owning player dựa trên UUID
-                skullMeta.setDisplayName(color.transalate(topItemSection.getString("Name")
-                        .replace("<player_name>", Bukkit.getOfflinePlayer(UUID.fromString(playerUUID)).getName()))); // Đặt displayName cho skullMeta
+                skullMeta.setOwningPlayer(Bukkit.getOfflinePlayer(UUID.fromString(playerUUID)));
 
+
+                String name = topItemSection.getString("Name")
+                        .replace("<player_name>", Bukkit.getOfflinePlayer(UUID.fromString(playerUUID)).getName())
+                        .replace("<top>", String.valueOf(top));
+                skullMeta.setDisplayName(color.transalate(name));
 
                 skullMeta.setLore(translatedLore);
-
                 if (topItemSection.getBoolean("Glow")) {
                     skullMeta.addEnchant(Enchantment.DURABILITY, 1, true);
                     skullMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
@@ -190,36 +185,142 @@
 
             return topPlayers;
         }
-        private List<String> getLoreFromConfig(ConfigurationSection section, String key) {
-            List<String> lore = new ArrayList<>();
-            if (section.isList(key)) {
-                for (Object obj : section.getList(key)) {
-                    if (obj instanceof String) {
-                        lore.add(color.transalate((String) obj));
-                    } else if (obj instanceof List) {
-                        for (String nestedLine : (List<String>) obj) {
-                            lore.add(color.transalate(nestedLine));
-                        }
+        public void openTopDiemDanhTongGUI(Player player) {
+            String title = color.transalate(plugin.topGuiConfig.getString("TotalTitle"));
+            Inventory gui = Bukkit.createInventory(null, 54, title);
+
+
+            Map<UUID, Integer> topPlayers = getTopDiemDanhTongPlayers();
+
+
+            int[] topPositions = {10, 19, 20, 28, 29, 30, 37, 38, 39, 40};
+
+            int index = 0;
+            for (Map.Entry<UUID, Integer> entry : topPlayers.entrySet()) {
+                UUID playerUUID = entry.getKey();
+                int totalDays = entry.getValue();
+
+
+                ConfigurationSection topItemSection = plugin.topGuiConfig.getConfigurationSection("ItemTops.Total.Icon.HavePlayer");
+                if (topItemSection == null) {
+                    plugin.getLogger().warning("Missing configuration for Total in topgui.yml");
+                    return;
+                }
+
+
+                String playerName = playerUUID != null ? Bukkit.getOfflinePlayer(playerUUID).getName() : "Chưa có";
+
+                ItemStack item = createItemFromConfig(topItemSection, playerUUID.toString(), totalDays, index + 1);
+                gui.setItem(topPositions[index], item);
+
+                index++;
+            }
+
+
+            ConfigurationSection noPlayerItemSection = plugin.topGuiConfig.getConfigurationSection("ItemTops.Total.Icon.NoPlayer");
+            if (noPlayerItemSection != null) {
+                ItemStack noPlayerItem = createItemFromConfig(noPlayerItemSection, null, 0, 0);
+                for (int i = 0; i < topPositions.length; i++) {
+                    if (gui.getItem(topPositions[i]) == null) {
+                        gui.setItem(topPositions[i], noPlayerItem);
                     }
                 }
+            } else {
+                plugin.getLogger().warning("Missing configuration for NoPlayer in topgui.yml");
             }
-            return lore;
+
+
+            ConfigurationSection fillItemSection = plugin.topGuiConfig.getConfigurationSection("ItemTops.FillItem");
+            if (fillItemSection != null) {
+                ItemStack fillItem = createItemFromConfig(fillItemSection, null, 0, 0);
+                for (int i = 0; i < gui.getSize(); i++) {
+                    if (gui.getItem(i) == null) {
+                        gui.setItem(i, fillItem);
+                    }
+                }
+            } else {
+                plugin.getLogger().warning("Missing 'FillItem' section in topgui.yml");
+            }
+            ConfigurationSection nextPageItemSection = plugin.topGuiConfig.getConfigurationSection("ItemTops.PrevPage");
+            if (nextPageItemSection != null) {
+                ItemStack nextPageItem = createItemFromConfig(nextPageItemSection, null, 0, 0);
+                gui.setItem(53, nextPageItem);
+            } else {
+                plugin.getLogger().warning("Missing 'PrevPage' section in topgui.yml");
+            }
+
+
+            Bukkit.getPluginManager().registerEvents(new TopGUIListener(), plugin);
+
+            player.openInventory(gui);
+        }
+        private Map<UUID, Integer> getTopDiemDanhTongPlayers() {
+            Map<UUID, Integer> playerCheckIns = new HashMap<>();
+
+
+            for (String playerUUID : plugin.playerData.getKeys(false)) {
+                int totalDays = plugin.playerData.getInt(playerUUID + ".totalDays", 0);
+                playerCheckIns.put(UUID.fromString(playerUUID), totalDays);
+            }
+
+
+            if (playerCheckIns.isEmpty()) {
+                return playerCheckIns;
+            }
+
+
+            List<Map.Entry<UUID, Integer>> sortedEntries = new ArrayList<>(playerCheckIns.entrySet());
+            sortedEntries.sort(Map.Entry.comparingByValue(Comparator.reverseOrder()));
+
+
+            int topLimit = Math.min(10, sortedEntries.size());
+            Map<UUID, Integer> topPlayers = new LinkedHashMap<>();
+            for (int i = 0; i < topLimit; i++) {
+                Map.Entry<UUID, Integer> entry = sortedEntries.get(i);
+                topPlayers.put(entry.getKey(), entry.getValue());
+            }
+
+            return topPlayers;
         }
         public class TopGUIListener implements Listener {
             @EventHandler
             public void onInventoryClick(InventoryClickEvent event) {
-                if (!event.getView().getTitle().equals(plugin.getTopGuiTitle().replace("<month>", String.valueOf(LocalDate.now().getMonthValue())))) return;
+
+                if (!event.getView().getTitle().equals(plugin.getTopGuiTitle().replace("<month>", String.valueOf(LocalDate.now().getMonthValue()))) ||
+                        !event.getView().getTitle().equals(color.transalate(plugin.topGuiConfig.getString("TotalTitle")))) {
+                    return;
+                }
+
                 if (!(event.getWhoClicked() instanceof Player)) {
                     event.getWhoClicked().sendMessage(plugin.getMessage("NotPlayer"));
                     return;
                 }
+
                 Player player = (Player) event.getWhoClicked();
                 int slot = event.getSlot();
-                if (slot < 55) {
-                    event.setCancelled(true);
-                    openTopDiemDanhGUI(player);
+
+                if (slot < 53) {
+                    if (event.getView().getTitle().equals(plugin.getTopGuiTitle().replace("<month>", String.valueOf(LocalDate.now().getMonthValue())))) {
+
+                        event.setCancelled(true);
+                    } else {
+                        event.setCancelled(true);
+                    }
+                } else if (slot == 53) { 
+                    if (event.getView().getTitle().equals(plugin.getTopGuiTitle().replace("<month>", String.valueOf(LocalDate.now().getMonthValue())))) {
+                        player.closeInventory();
+                        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                            openTopDiemDanhTongGUI(player);
+                        }, 1L);
+                    } else {
+                        player.closeInventory();
+                        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                            openTopDiemDanhGUI(player);
+                        }, 1L);
+                    }
                 }
             }
         }
+
 
     }
