@@ -285,9 +285,11 @@
         public class TopGUIListener implements Listener {
             @EventHandler
             public void onInventoryClick(InventoryClickEvent event) {
+                String title = event.getView().getTitle();
+                String topMonthTitle = plugin.getTopGuiTitle().replace("<month>", String.valueOf(LocalDate.now().getMonthValue()));
+                String topTotalTitle = color.transalate(plugin.topGuiConfig.getString("TotalTitle"));
 
-                if (!event.getView().getTitle().equals(plugin.getTopGuiTitle().replace("<month>", String.valueOf(LocalDate.now().getMonthValue()))) ||
-                        !event.getView().getTitle().equals(color.transalate(plugin.topGuiConfig.getString("TotalTitle")))) {
+                if (!title.equals(topMonthTitle) && !title.equals(topTotalTitle)) {
                     return;
                 }
 
@@ -299,20 +301,15 @@
                 Player player = (Player) event.getWhoClicked();
                 int slot = event.getSlot();
 
-                if (slot < 53) {
-                    if (event.getView().getTitle().equals(plugin.getTopGuiTitle().replace("<month>", String.valueOf(LocalDate.now().getMonthValue())))) {
+                event.setCancelled(true);
 
-                        event.setCancelled(true);
-                    } else {
-                        event.setCancelled(true);
-                    }
-                } else if (slot == 53) { 
-                    if (event.getView().getTitle().equals(plugin.getTopGuiTitle().replace("<month>", String.valueOf(LocalDate.now().getMonthValue())))) {
+                if (slot == 53) { 
+                    if (title.equals(topMonthTitle)) {
                         player.closeInventory();
                         Bukkit.getScheduler().runTaskLater(plugin, () -> {
                             openTopDiemDanhTongGUI(player);
                         }, 1L);
-                    } else {
+                    } else if (title.equals(topTotalTitle)) {
                         player.closeInventory();
                         Bukkit.getScheduler().runTaskLater(plugin, () -> {
                             openTopDiemDanhGUI(player);
