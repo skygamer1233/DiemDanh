@@ -106,13 +106,13 @@ public class DiemDanhCommand implements CommandExecutor {
                 plugin.getDiemDanhTop().openTopDiemDanhGUI(player);
                 return true;
             } else if (args.length == 0 && sender instanceof Player) {
-                plugin.openDiemDanh((Player) sender);
+                plugin.getDiemDanhGUI().openDiemDanhGUI((Player) sender);
                 return true;
             } else {
                 sender.sendMessage(plugin.getMessage("SyntaxError"));
                 sender.sendMessage(plugin.getMessage("DiemDanhHelp"));
-                sender.sendMessage(plugin.getMessage("GiveTicketUsage"));
-                sender.sendMessage(plugin.getMessage("ReloadUsage"));
+                if (sender.hasPermission("diemdanh.giveticket")) {sender.sendMessage(plugin.getMessage("GiveTicketUsage"));}
+                if (sender.hasPermission("diemdanh.reload")) {sender.sendMessage(plugin.getMessage("ReloadUsage"));}
                 sender.sendMessage(plugin.getMessage("TopUsage"));
                 return true;
             }

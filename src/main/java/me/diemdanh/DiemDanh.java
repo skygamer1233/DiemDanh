@@ -1,21 +1,13 @@
 package me.diemdanh;
 
-import com.cryptomorin.xseries.XMaterial;
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
+
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemFlag;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -162,6 +154,7 @@ public class DiemDanh extends JavaPlugin implements Listener {
     public DiemDanhTop getDiemDanhTop() {
         return diemDanhTop;
     }
+    public DiemDanhGUI getDiemDanhGUI() { return diemDanhGUI;}
     public String getTopGuiTitle() {
         return topGuiTitle;
     }
@@ -194,12 +187,14 @@ public class DiemDanh extends JavaPlugin implements Listener {
         updateMissedDays(playerUUID);
 
         int lastCheckInMonth = playerData.getInt(playerUUID + ".lastCheckInMonth", 0);
+
         if (today.getMonthValue() != lastCheckInMonth) {
             playerData.set(playerUUID + ".checkedDays", new ArrayList<>());
             playerData.set(playerUUID + ".daysCheckedIn", 0);
             playerData.set(playerUUID + ".missedDays", new ArrayList<>());
             for (int daysRequired : new int[]{7, 14, 21}) {
-                playerData.set(playerUUID + ".tichluy." + daysRequired, false);
+                playerData.set(playerUUID + ".tichluy." + daysRequired + ".claimed", false);
+                playerData.set(playerUUID + ".tichluy." + daysRequired + ".month", 0);
             }
             savePlayerData();
         }
@@ -273,8 +268,6 @@ public class DiemDanh extends JavaPlugin implements Listener {
 
         return color.transalate(message);
     }
-    public void openDiemDanh(Player player) {
-        diemDanhGUI.openDiemDanhGUI(player);
-    }
+
 
 }

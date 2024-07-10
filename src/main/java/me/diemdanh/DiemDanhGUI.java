@@ -248,7 +248,8 @@ public class DiemDanhGUI implements Listener {
                 ConfigurationSection rewardSection = plugin.getConfig().getConfigurationSection("TichLuy." + (slot - 36 + 1) * 7 + "ngay");
                 if (rewardSection != null) {
                     executeCommands(rewardSection.getStringList("Reward"), player);
-                    plugin.playerData.set(playerUUID + ".tichluy." + (slot - 36 + 1) * 7, true);
+                    plugin.playerData.set(playerUUID + ".tichluy." + (slot - 36 + 1) * 7 + ".claimed", true);
+                    plugin.playerData.set(playerUUID + ".tichluy." + (slot - 36 + 1) * 7 + ".month", today.getMonthValue());
                     plugin.savePlayerData();
                     player.sendMessage(color.transalate(plugin.getConfig().getString("Message.TichLuySuccess", "&aBạn đã nhận quà tích lũy %days% ngày thành công!").replace("%days%", String.valueOf((slot - 36 + 1) * 7))));
                 }
@@ -262,7 +263,7 @@ public class DiemDanhGUI implements Listener {
         openDiemDanhGUI(player);
     }
 
-    private void executeCommands(List<String> commands, Player player) {
+    public void executeCommands(List<String> commands, Player player) {
         for (String command : commands) {
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replace("<player>", player.getName()));
         }
@@ -345,7 +346,17 @@ public class DiemDanhGUI implements Listener {
 
     private String getTichLuyItemKey(String playerUUID, int daysRequired) {
         int daysCheckedIn = getDaysCheckedInThisMonth(playerUUID);
-        boolean hasClaimed = plugin.playerData.getBoolean(playerUUID + ".tichluy." + daysRequired, false);
+        int currentMonth = LocalDate.now().getMonthValue();
+        int claimedMonth = plugin.playerData.getInt(playerUUID + ".tichluy." + daysRequired + ".month", 0);
+
+
+        if (currentMonth != claimedMonth) {
+            plugin.playerData.set(playerUUID + ".tichluy." + daysRequired + ".claimed", false);
+            plugin.playerData.set(playerUUID + ".tichluy." + daysRequired + ".month", 0);
+            plugin.savePlayerData();
+        }
+
+        boolean hasClaimed = plugin.playerData.getBoolean(playerUUID + ".tichluy." + daysRequired + ".claimed", false);
 
         if (daysCheckedIn >= daysRequired && !hasClaimed) {
             return "NhanQua";
