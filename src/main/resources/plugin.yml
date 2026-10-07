@@ -1,5 +1,5 @@
 name: DiemDanh
-version: '1.4-BETA'
+version: '1.5-BETA'
 main: me.diemdanh.DiemDanh
 api-version: '1.13'
 commands:
@@ -19,4 +19,7 @@ permissions:
     default: op
   diemdanh.giveticket:
     description: Cho phép người chơi sử dụng lệnh /diemdanh giveticket
+    default: op
+  diemdanh.editor:
+    description: Cho phép người chơi sử dụng lệnh /diemdanh editor
     default: op

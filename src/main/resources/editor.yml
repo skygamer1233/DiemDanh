@@ -1,0 +1,129 @@
+# ==========================================
+# CẤU HÌNH GIAO DIỆN & MESSAGES CỦA EDITOR
+# ==========================================
+
+Title:
+  MainMenu: "&8[&cDiemDanh Editor&8] &0Menu Chính"
+  DaysMenu: "&8[&cDiemDanh Editor&8] &0Ngày Thường"
+  TichLuyMenu: "&8[&cDiemDanh Editor&8] &0Tích Lũy"
+  SpecialDayMenu: "&8[&cDiemDanh Editor&8] &0Ngày Lễ"
+  CommandEditor: "&8[Editor] &0<title>"
+
+Icons:
+  NoRewardFormat: " &c(Chưa có lệnh thưởng)"
+  RewardFormat: " &e- /<command>"
+
+  MainMenu:
+    Days:
+      ID: "CHEST"
+      Name: "&a&lQuà Ngày Thường (1 - 31)"
+      Lore:
+        - "&7Click để chỉnh sửa danh sách lệnh"
+        - "&7thưởng cho từng ngày trong tháng."
+    TichLuy:
+      ID: "NETHER_STAR"
+      Name: "&e&lQuà Tích Lũy (7, 14, 21 ngày)"
+      Lore:
+        - "&7Click để chỉnh sửa danh sách lệnh"
+        - "&7thưởng mốc điểm danh tích lũy."
+    SpecialDay:
+      ID: "DRAGON_EGG"
+      Name: "&c&lQuản Lý Ngày Lễ (SpecialDay)"
+      Lore:
+        - "&7Click để thêm, xóa ngày lễ"
+        - "&7hoặc chỉnh sửa quà ngày lễ."
+
+  DaysMenu:
+    DayItem:
+      ID: "PAPER"
+      Name: "&eNgày <day>"
+      Lore:
+        - "&7Danh sách lệnh thưởng hiện tại:"
+        - "<rewards>"
+        - ""
+        - "&aClick để chỉnh sửa lệnh!"
+    Back:
+      ID: "BARRIER"
+      Name: "&cQuay Lại Menu Chính"
+
+  TichLuyMenu:
+    Item:
+      ID: "BEACON"
+      Name: "&bMốc <moc> Ngày"
+      Lore:
+        - "&7Lệnh thưởng mốc &e<moc> ngày&7:"
+        - "<rewards>"
+        - ""
+        - "&aClick để chỉnh sửa!"
+    Back:
+      ID: "BARRIER"
+      Name: "&cQuay Lại Menu Chính"
+
+  SpecialDayMenu:
+    SpecialItem:
+      ID: "SUNFLOWER"
+      Name: "&6Key: &e<key>"
+      Lore:
+        - "&7Tên hiển thị: <display_name>"
+        - "&7Thời gian: &eNgày <date> Tháng <month>"
+        - "&7Lệnh thưởng:"
+        - "<rewards>"
+        - ""
+        - "&a[Click Trái] &7Sửa lệnh thưởng & Tên hiển thị"
+        - "&c[Click Phải] &7Xóa ngày lễ này"
+    CreateNew:
+      ID: "EMERALD_BLOCK"
+      Name: "&a+ Tạo Ngày Lễ Mới"
+      Lore:
+        - "&7Click để tạo ngày lễ mới qua chat"
+    Back:
+      ID: "BARRIER"
+      Name: "&cQuay Lại Menu Chính"
+
+  CommandEditor:
+    CmdItem:
+      ID: "WRITTEN_BOOK"
+      Name: "&eLệnh #<index>"
+      Lore:
+        - "&f/<command>"
+        - ""
+        - "&cClick chuột để XÓA lệnh này!"
+    AddCmd:
+      ID: "ANVIL"
+      Name: "&a+ Thêm Lệnh Mới"
+      Lore:
+        - "&7Click để nhập lệnh thưởng mới vào Chat"
+    ChangeNameTag:
+      ID: "NAME_TAG"
+      Name: "&eĐổi Tên Hiển Thị (Name)"
+      Lore:
+        - "&7Tên hiện tại: <display_name>"
+        - ""
+        - "&aClick để nhập Tên hiển thị mới vào Chat!"
+    Back:
+      ID: "BARRIER"
+      Name: "&cQuay Lại"
+      Lore:
+        - "&7Menu trước"
+
+Messages:
+  Cancel: "&cĐã hủy thao tác chỉnh sửa."
+  AddCommandPrompt:
+    - "&a[DiemDanh Editor] Nhập lệnh thưởng mới vào chat (Không bao gồm dấu / ban đầu)."
+    - "&aVí dụ: &egive <player> diamond 5"
+    - "&7(Gõ &ccancel &7để hủy)"
+  AddCommandSuccess: "&aĐã thêm lệnh thành công: &e/<command>"
+  DeleteCommandSuccess: "&cĐã xóa lệnh: &e/<command>"
+  ChangeNamePrompt:
+    - "&a[DiemDanh Editor] Nhập Tên hiển thị mới cho ngày lễ vào chat (Hỗ trợ mã màu &)."
+    - "&aVí dụ: &c&lPhụ Nữ Việt Nam"
+    - "&7(Gõ &ccancel &7để hủy)"
+  ChangeNameSuccess: "&aĐã đổi Tên hiển thị thành công: <name>"
+  CreateSpecialPrompt:
+    - "&a[DiemDanh Editor] Hãy nhập theo cú pháp: &e<KeyTenLe> <Ngay> <Thang>"
+    - "&aVí dụ: &eTetNguyenDan 29 1"
+    - "&7(Gõ &ccancel &7để hủy)"
+  CreateSpecialSuccess: "&aĐã tạo ngày lễ mới: &e<key> &a(Ngày <date>/<month>)"
+  CreateSpecialSyntaxError: "&cSai cú pháp! Phải là: <KeyTenLe> <Ngay> <Thang>"
+  CreateSpecialNumberError: "&cNgày và tháng phải là số nguyên!"
+  DeleteSpecialSuccess: "&cĐã xóa ngày lễ &e<key>"

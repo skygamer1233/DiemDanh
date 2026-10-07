@@ -1,67 +1,40 @@
 TopTitle: "&c&lBảng Xếp Hạng Điểm Danh Tháng <month>" # Title của GUI
 TotalTitle: "&c&lBảng Xếp Hạng Điểm Danh Tổng" # Title của GUI
 version: 1
-ItemTops:
-  Top:
-    Icon:
-      HavePlayer:
-        ID: PLAYER_HEAD
-        Data: 0
-        Name: "&aTop <top>: &c<player_name>"
-        Lore:
-          - "&aĐã điểm danh được : &e<days> &angày"
-          - "&f"
-          - "&f"
-        Glow: true
-      NoPlayer:
-        ID: PLAYER_HEAD
-        Data: 0
-        Name: "&eChưa Có"
-        Lore:
-          - "&fHiện chưa có ai giành top này"
-          - "&f"
-          - "&f"
-        Glow: false
-  Total:
-    Icon:
-      HavePlayer:
-        ID: PLAYER_HEAD
-        Data: 0
-        Name: "&aTop <top>: &c<player_name>"
-        Lore:
-          - "&aĐã điểm danh được : &e<totaldays> &angày"
-          - "&f"
-          - "&f"
-        Glow: true
-      NoPlayer:
-        ID: PLAYER_HEAD
-        Data: 0
-        Name: "&eChưa Có"
-        Lore:
-          - "&fHiện chưa có ai giành top này"
-          - "&f"
-          - "&f"
-        Glow: false
-  FillItem:
-    ID: BLACK_STAINED_GLASS_PANE
-    Data: 0
-    Name: "&f"
-    Lore:
-      - "&f"
-    Glow: true
-  NextPage:
-    ID: BOOK
-    Data: 0
-    Name: "&aTrang Sau"
-    Lore:
-      - "&f"
-    Glow: true
-  PrevPage:
-    ID: BOOK
-    Data: 0
-    Name: "&aTrang Trước"
-    Lore:
-      - "&f"
-    Glow: false
 
+# Cấu hình hiển thị người chơi trên Bảng Xếp Hạng
+TopItem:
+  ID: PLAYER_HEAD
+  Data: 0
+  Name: "&aTop <top>: &c<player_name>"
+  Lore:
+    - "&aĐã điểm danh được : &e<days> &angày"
+    - "&aTổng tích lũy : &e<totaldays> &angày"
+  Glow: true
 
+# Cấu hình nút chuyển sang trang Top Tổng (Slot 53)
+NextPage:
+  ID: BOOK
+  Data: 0
+  Name: "&aTrang Sau (Top Tổng)"
+  Lore:
+    - "&eClick để xem bảng xếp hạng tổng"
+  Glow: true
+
+# Cấu hình nút quay lại trang Top Tháng (Slot 45)
+BackPage:
+  ID: BOOK
+  Data: 0
+  Name: "&aTrang Trước (Top Tháng)"
+  Lore:
+    - "&eClick để quay lại bảng xếp hạng tháng"
+  Glow: false
+
+# Cấu hình trang trí (nếu cần)
+FillItem:
+  ID: BLACK_STAINED_GLASS_PANE
+  Data: 0
+  Name: "&f"
+  Lore:
+    - "&f"
+  Glow: true
