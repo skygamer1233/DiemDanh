@@ -16,10 +16,15 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class DiemDanhGUI implements Listener {
     private final DiemDanh plugin;
+    // Thêm Map lưu Cooldown chống spam click GUI
+    private final Map<UUID, Long> cooldowns = new HashMap<>();
 
     public DiemDanhGUI(DiemDanh plugin) {
         this.plugin = plugin;
@@ -28,8 +33,18 @@ public class DiemDanhGUI implements Listener {
     public void openDiemDanhGUI(Player player) {
         LocalDate today = LocalDate.now();
         String playerUUID = player.getUniqueId().toString();
-        String titleWithMonth = plugin.guiTitle.replace("<month>", String.valueOf(today.getMonthValue()));
-        Inventory gui = Bukkit.createInventory(null, 45, titleWithMonth);
+        String titleWithMonth = color.transalate(plugin.guiTitle.replace("<month>", String.valueOf(today.getMonthValue())));
+
+        // Tái sử dụng Inventory hiện tại nếu người chơi đang mở GUI điểm danh để tránh giật lag do mở lại GUI
+        Inventory gui;
+        if (player.getOpenInventory().getTopInventory().getHolder() == null
+                && player.getOpenInventory().getTopInventory().getSize() == 45
+                && color.transalate(player.getOpenInventory().getTitle()).equals(titleWithMonth)) {
+            gui = player.getOpenInventory().getTopInventory();
+            gui.clear();
+        } else {
+            gui = Bukkit.createInventory(null, 45, titleWithMonth);
+        }
 
         ConfigurationSection daysSection = plugin.getConfig().getConfigurationSection("Days");
         if (daysSection == null) {
@@ -38,15 +53,21 @@ public class DiemDanhGUI implements Listener {
         }
         List<?> dayEntries = new ArrayList<>(daysSection.getValues(false).values());
 
-        for (String specialDayKey : plugin.getConfig().getConfigurationSection("SpecialDay").getKeys(false)) {
-            ConfigurationSection specialDaySection = plugin.getConfig().getConfigurationSection("SpecialDay." + specialDayKey);
-            int specialDayDate = specialDaySection.getInt("Require.Date");
-            int specialDayMonth = specialDaySection.getInt("Require.Month");
-            if (today.getMonthValue() == specialDayMonth) {
-                String itemKey = getSpecialDayItemKey(playerUUID, specialDayKey);
-                ConfigurationSection itemSection = plugin.getConfig().getConfigurationSection("SpecialDay." + specialDayKey + ".Icon." + itemKey);
-                ItemStack item = createItemFromConfig(itemSection, specialDayDate, playerUUID);
-                gui.setItem(specialDayDate - 1, item);
+        ConfigurationSection specialSection = plugin.getConfig().getConfigurationSection("SpecialDay");
+        if (specialSection != null) {
+            for (String specialDayKey : specialSection.getKeys(false)) {
+                ConfigurationSection specialDaySection = plugin.getConfig().getConfigurationSection("SpecialDay." + specialDayKey);
+                if (specialDaySection == null) continue;
+                int specialDayDate = specialDaySection.getInt("Require.Date");
+                int specialDayMonth = specialDaySection.getInt("Require.Month");
+                if (today.getMonthValue() == specialDayMonth) {
+                    String itemKey = getSpecialDayItemKey(playerUUID, specialDayKey);
+                    ConfigurationSection itemSection = plugin.getConfig().getConfigurationSection("SpecialDay." + specialDayKey + ".Icon." + itemKey);
+                    if (itemSection != null) {
+                        ItemStack item = createItemFromConfig(itemSection, specialDayDate, playerUUID);
+                        gui.setItem(specialDayDate - 1, item);
+                    }
+                }
             }
         }
 
@@ -56,13 +77,7 @@ public class DiemDanhGUI implements Listener {
             }
 
             String itemKey = getItemKeyForDay(day, playerUUID);
-            ConfigurationSection itemSection;
-
-            if (itemKey.equals("DiemDanhBu")) {
-                itemSection = plugin.getConfig().getConfigurationSection("Item." + itemKey);
-            } else {
-                itemSection = plugin.getConfig().getConfigurationSection("Item." + itemKey);
-            }
+            ConfigurationSection itemSection = plugin.getConfig().getConfigurationSection("Item." + itemKey);
 
             if (itemSection == null) {
                 plugin.getLogger().warning("Missing item section for key: " + itemKey);
@@ -89,23 +104,25 @@ public class DiemDanhGUI implements Listener {
                 translatedLore.add(color.transalate(line));
             }
 
-            XMaterial xMaterial = XMaterial.matchXMaterial(itemSection.getString("ID")).orElse(XMaterial.BARRIER);
+            XMaterial xMaterial = XMaterial.matchXMaterial(itemSection.getString("ID", "BARRIER")).orElse(XMaterial.BARRIER);
             Material material = xMaterial.parseMaterial();
+            if (material == null) material = Material.BARRIER;
 
-            String name = color.transalate(itemSection.getString("Name").replace("<date>", String.valueOf(day)));
+            String name = color.transalate(itemSection.getString("Name", "").replace("<date>", String.valueOf(day)));
             boolean glow = itemSection.getBoolean("Glow");
 
-            int itemAmount = day;
-
-            ItemStack item = new ItemStack(material, itemAmount);
+            ItemStack item = new ItemStack(material, day);
             ItemMeta meta = item.getItemMeta();
-            meta.setDisplayName(name);
-            meta.setLore(translatedLore);
-            if (glow) {
-                meta.addEnchant(Enchantment.DURABILITY, 1, true);
-                meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+            if (meta != null) {
+                meta.setDisplayName(name);
+                meta.setLore(translatedLore);
+                if (glow) {
+                    // Sửa DURABILITY -> UNBREAKING tương thích 1.21+
+                    meta.addEnchant(Enchantment.UNBREAKING, 1, true);
+                    meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+                }
+                item.setItemMeta(meta);
             }
-            item.setItemMeta(meta);
 
             gui.setItem(day - 1, item);
         }
@@ -114,9 +131,10 @@ public class DiemDanhGUI implements Listener {
             int daysRequired = (i + 1) * 7;
             String itemKey = getTichLuyItemKey(playerUUID, daysRequired);
             ConfigurationSection itemSection = plugin.getConfig().getConfigurationSection("TichLuy." + daysRequired + "ngay.Icon." + itemKey);
-
-            ItemStack item = createItemFromConfig(itemSection, daysRequired, playerUUID);
-            gui.setItem(36 + i, item);
+            if (itemSection != null) {
+                ItemStack item = createItemFromConfig(itemSection, daysRequired, playerUUID);
+                gui.setItem(36 + i, item);
+            }
         }
 
         ConfigurationSection ticketSection = plugin.getConfig().getConfigurationSection("Item.Ticket");
@@ -137,12 +155,17 @@ public class DiemDanhGUI implements Listener {
             plugin.getLogger().warning("Missing 'Item.ThongTin' section in config.yml");
         }
 
-        player.openInventory(gui);
+        if (player.getOpenInventory().getTopInventory() != gui) {
+            player.openInventory(gui);
+        }
     }
 
     private ItemStack createItemFromConfig(ConfigurationSection itemSection, int replaceValue, String playerUUID) {
-        XMaterial xMaterial = XMaterial.matchXMaterial(itemSection.getString("ID")).orElse(XMaterial.BARRIER);
+        if (itemSection == null) return new ItemStack(Material.BARRIER);
+
+        XMaterial xMaterial = XMaterial.matchXMaterial(itemSection.getString("ID", "BARRIER")).orElse(XMaterial.BARRIER);
         Material material = xMaterial.parseMaterial();
+        if (material == null) material = Material.BARRIER;
 
         List<String> rawlore = itemSection.getStringList("Lore");
         List<String> translatedLore = new ArrayList<>();
@@ -155,37 +178,44 @@ public class DiemDanhGUI implements Listener {
 
         ItemStack item = new ItemStack(material, 1);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(color.transalate(itemSection.getString("Name").replace("<date>", String.valueOf(replaceValue))));
-        meta.setLore(translatedLore);
-        if (itemSection.getBoolean("Glow")) {
-            meta.addEnchant(Enchantment.DURABILITY, 1, true);
-            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+        if (meta != null) {
+            meta.setDisplayName(color.transalate(itemSection.getString("Name", "").replace("<date>", String.valueOf(replaceValue))));
+            meta.setLore(translatedLore);
+            if (itemSection.getBoolean("Glow")) {
+                // Sửa DURABILITY -> UNBREAKING tương thích 1.21+
+                meta.addEnchant(Enchantment.UNBREAKING, 1, true);
+                meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+            }
+            item.setItemMeta(meta);
         }
-
-        item.setItemMeta(meta);
         return item;
     }
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        if (!event.getView().getTitle().equals(plugin.guiTitle.replace("<month>", String.valueOf(LocalDate.now().getMonthValue()))))
-            return;
-        if (!(event.getWhoClicked() instanceof Player)) {
-            event.getWhoClicked().sendMessage(plugin.getMessage("NotPlayer"));
-            return;
-        }
+        if (!(event.getWhoClicked() instanceof Player)) return;
 
         Player player = (Player) event.getWhoClicked();
-        int slot = event.getSlot();
-        LocalDate today = LocalDate.now();
-        String playerUUID = player.getUniqueId().toString();
 
-        if (slot < 0 || slot > 44) {
-            event.setCancelled(true);
-            return;
-        }
+        // Kiểm tra đúng tiêu đề GUI bằng dịch mã màu chuẩn
+        String currentTitle = color.transalate(event.getView().getTitle());
+        String expectedTitle = color.transalate(plugin.guiTitle.replace("<month>", String.valueOf(LocalDate.now().getMonthValue())));
+        if (!currentTitle.equals(expectedTitle)) return;
 
         event.setCancelled(true);
+
+        int slot = event.getSlot();
+        if (slot < 0 || slot > 44) return;
+
+        // Xử lý Anti-Spam Click (Cooldown 400ms giữa các lần click)
+        long now = System.currentTimeMillis();
+        if (cooldowns.containsKey(player.getUniqueId()) && now - cooldowns.get(player.getUniqueId()) < 400) {
+            return;
+        }
+        cooldowns.put(player.getUniqueId(), now);
+
+        LocalDate today = LocalDate.now();
+        String playerUUID = player.getUniqueId().toString();
 
         String originalItemKey;
         String specialDayKey = getSpecialDayKey(today, slot + 1);
@@ -260,10 +290,12 @@ public class DiemDanhGUI implements Listener {
             }
         }
 
+        // Cập nhật lại giao diện người chơi
         openDiemDanhGUI(player);
     }
 
     public void executeCommands(List<String> commands, Player player) {
+        if (commands == null) return;
         for (String command : commands) {
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replace("<player>", player.getName()));
         }
@@ -326,8 +358,11 @@ public class DiemDanhGUI implements Listener {
 
         LocalDate lastCheckInDate = LocalDate.parse(plugin.playerData.getString(playerUUID + ".lastCheckIn", "1970-01-01"));
         if (today.getYear() != lastCheckInDate.getYear()) {
-            for (String key : plugin.playerData.getConfigurationSection(playerUUID + ".specialDays").getKeys(false)) {
-                plugin.playerData.set(playerUUID + ".specialDays." + key, false);
+            ConfigurationSection specialSec = plugin.playerData.getConfigurationSection(playerUUID + ".specialDays");
+            if (specialSec != null) {
+                for (String key : specialSec.getKeys(false)) {
+                    plugin.playerData.set(playerUUID + ".specialDays." + key, false);
+                }
             }
         }
 
@@ -349,11 +384,10 @@ public class DiemDanhGUI implements Listener {
         int currentMonth = LocalDate.now().getMonthValue();
         int claimedMonth = plugin.playerData.getInt(playerUUID + ".tichluy." + daysRequired + ".month", 0);
 
-
         if (currentMonth != claimedMonth) {
             plugin.playerData.set(playerUUID + ".tichluy." + daysRequired + ".claimed", false);
             plugin.playerData.set(playerUUID + ".tichluy." + daysRequired + ".month", 0);
-            plugin.savePlayerData();
+            // Bỏ plugin.savePlayerData() ở đây để tránh ghi đĩa liên tục khi chỉ đọc thông tin render GUI
         }
 
         boolean hasClaimed = plugin.playerData.getBoolean(playerUUID + ".tichluy." + daysRequired + ".claimed", false);
@@ -368,8 +402,12 @@ public class DiemDanhGUI implements Listener {
     }
 
     private String getSpecialDayKey(LocalDate today, int day) {
-        for (String key : plugin.getConfig().getConfigurationSection("SpecialDay").getKeys(false)) {
+        ConfigurationSection specialSec = plugin.getConfig().getConfigurationSection("SpecialDay");
+        if (specialSec == null) return null;
+
+        for (String key : specialSec.getKeys(false)) {
             ConfigurationSection specialDaySection = plugin.getConfig().getConfigurationSection("SpecialDay." + key + ".Require");
+            if (specialDaySection == null) continue;
             int specialDayDate = specialDaySection.getInt("Date");
             int specialDayMonth = specialDaySection.getInt("Month");
             if (specialDayMonth < 1 || specialDayMonth > 12) {
@@ -386,6 +424,8 @@ public class DiemDanhGUI implements Listener {
     private String getSpecialDayItemKey(String playerUUID, String specialDayKey) {
         boolean hasCheckedIn = plugin.playerData.getBoolean(playerUUID + ".specialDays." + specialDayKey, false);
         ConfigurationSection specialDaySection = plugin.getConfig().getConfigurationSection("SpecialDay." + specialDayKey + ".Require");
+        if (specialDaySection == null) return "ChuaDiemDanh";
+
         int specialDayDate = specialDaySection.getInt("Date");
         int specialDayMonth = specialDaySection.getInt("Month");
 

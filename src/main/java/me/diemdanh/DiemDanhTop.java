@@ -3,6 +3,7 @@ package me.diemdanh;
 import com.cryptomorin.xseries.XMaterial;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -30,7 +31,8 @@ public class DiemDanhTop {
         int currentMonth = LocalDate.now().getMonthValue();
         Map<UUID, Integer> topPlayers = getTopDiemDanhPlayers(currentMonth);
 
-        Inventory gui = Bukkit.createInventory(null, 54, plugin.topGuiTitle.replace("<month>", String.valueOf(currentMonth)));
+        String title = color.transalate(plugin.topGuiTitle.replace("<month>", String.valueOf(currentMonth)));
+        Inventory gui = Bukkit.createInventory(null, 54, title);
 
         int slot = 0;
         ConfigurationSection topSection = plugin.topGuiConfig.getConfigurationSection("TopItem");
@@ -58,33 +60,33 @@ public class DiemDanhTop {
 
     private Map<UUID, Integer> getTopDiemDanhPlayers(int month) {
         return plugin.playerData.getKeys(false).stream()
-            // Lọc người chơi có tháng điểm danh trùng khớp
-            .filter(playerUUID -> plugin.playerData.getInt(playerUUID + ".lastCheckInMonth", 0) == month)
-            // Chuyển đổi thành Map.Entry với UUID và số ngày điểm danh
-            .collect(Collectors.toMap(
-                UUID::fromString,
-                playerUUID -> plugin.playerData.getInt(playerUUID + ".daysCheckedIn", 0),
-                (existing, replacement) -> existing,
-                LinkedHashMap::new
-            ))
-            // Chuyển đổi thành Stream các Entry
-            .entrySet().stream()
-            // Sắp xếp theo số ngày điểm danh (giảm dần)
-            .sorted(Map.Entry.<UUID, Integer>comparingByValue().reversed())
-            // Giới hạn 10 người đứng đầu
-            .limit(10)
-            // Collect kết quả vào LinkedHashMap để giữ thứ tự
-            .collect(Collectors.toMap(
-                Map.Entry::getKey,
-                Map.Entry::getValue,
-                (e1, e2) -> e1,
-                LinkedHashMap::new
-            ));
+                // Kiểm tra an toàn xem Key có phải là UUID hợp lệ không
+                .filter(this::isValidUUID)
+                .filter(playerUUID -> plugin.playerData.getInt(playerUUID + ".lastCheckInMonth", 0) == month)
+                .collect(Collectors.toMap(
+                        UUID::fromString,
+                        playerUUID -> plugin.playerData.getInt(playerUUID + ".daysCheckedIn", 0),
+                        (existing, replacement) -> existing,
+                        LinkedHashMap::new
+                ))
+                .entrySet().stream()
+                .sorted(Map.Entry.<UUID, Integer>comparingByValue().reversed())
+                .limit(10)
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (e1, e2) -> e1,
+                        LinkedHashMap::new
+                ));
     }
 
     private ItemStack createItemFromConfig(ConfigurationSection topItemSection, String playerUUID, int daysCheckedIn, int top) {
-        XMaterial xMaterial = XMaterial.matchXMaterial(topItemSection.getString("ID")).orElse(XMaterial.BARRIER);
+        if (topItemSection == null) return new ItemStack(Material.BARRIER);
+
+        XMaterial xMaterial = XMaterial.matchXMaterial(topItemSection.getString("ID", "BARRIER")).orElse(XMaterial.BARRIER);
         Material material = xMaterial.parseMaterial();
+        if (material == null) material = Material.BARRIER;
+
         int totalDays = playerUUID != null ? plugin.playerData.getInt(playerUUID + ".totalDays", 0) : 0;
 
         List<String> rawlore = topItemSection.getStringList("Lore");
@@ -97,19 +99,24 @@ public class DiemDanhTop {
 
         ItemStack item = new ItemStack(material, 1);
         ItemMeta meta = item.getItemMeta();
+        if (meta == null) return item;
 
-        if (playerUUID != null && material == XMaterial.PLAYER_HEAD.parseMaterial()) {
-            SkullMeta skullMeta = (SkullMeta) meta;
-            skullMeta.setOwningPlayer(Bukkit.getOfflinePlayer(UUID.fromString(playerUUID)));
+        boolean isHead = playerUUID != null && material == XMaterial.PLAYER_HEAD.parseMaterial();
 
-            String name = topItemSection.getString("Name")
-                    .replace("<player_name>", Bukkit.getOfflinePlayer(UUID.fromString(playerUUID)).getName())
+        if (isHead && meta instanceof SkullMeta skullMeta) {
+            UUID uuid = UUID.fromString(playerUUID);
+            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+            skullMeta.setOwningPlayer(offlinePlayer);
+
+            String playerName = offlinePlayer.getName() != null ? offlinePlayer.getName() : "Unknown";
+            String rawName = topItemSection.getString("Name", "")
+                    .replace("<player_name>", playerName)
                     .replace("<top>", String.valueOf(top));
-            skullMeta.setDisplayName(color.transalate(name));
-
+            skullMeta.setDisplayName(color.transalate(rawName));
             skullMeta.setLore(translatedLore);
+
             if (topItemSection.getBoolean("Glow")) {
-                skullMeta.addEnchant(Enchantment.DURABILITY, 1, true);
+                skullMeta.addEnchant(Enchantment.UNBREAKING, 1, true);
                 skullMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             }
             item.setItemMeta(skullMeta);
@@ -120,7 +127,7 @@ public class DiemDanhTop {
             }
             meta.setLore(translatedLore);
             if (topItemSection.getBoolean("Glow")) {
-                meta.addEnchant(Enchantment.DURABILITY, 1, true);
+                meta.addEnchant(Enchantment.UNBREAKING, 1, true);
                 meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             }
             item.setItemMeta(meta);
@@ -130,7 +137,8 @@ public class DiemDanhTop {
     }
 
     public void openTopDiemDanhTongGUI(Player player) {
-        Inventory gui = Bukkit.createInventory(null, 54, plugin.TotalTitle);
+        String title = color.transalate(plugin.TotalTitle);
+        Inventory gui = Bukkit.createInventory(null, 54, title);
 
         Map<UUID, Integer> topPlayers = getTopTotalDiemDanhPlayers();
 
@@ -160,32 +168,45 @@ public class DiemDanhTop {
 
     private Map<UUID, Integer> getTopTotalDiemDanhPlayers() {
         return plugin.playerData.getKeys(false).stream()
-            .collect(Collectors.toMap(
-                UUID::fromString,
-                playerUUID -> plugin.playerData.getInt(playerUUID + ".totalDays", 0),
-                (existing, replacement) -> existing,
-                LinkedHashMap::new
-            ))
-            .entrySet().stream()
-            .sorted(Map.Entry.<UUID, Integer>comparingByValue().reversed())
-            .limit(10)
-            .collect(Collectors.toMap(
-                Map.Entry::getKey,
-                Map.Entry::getValue,
-                (e1, e2) -> e1,
-                LinkedHashMap::new
-            ));
+                .filter(this::isValidUUID)
+                .collect(Collectors.toMap(
+                        UUID::fromString,
+                        playerUUID -> plugin.playerData.getInt(playerUUID + ".totalDays", 0),
+                        (existing, replacement) -> existing,
+                        LinkedHashMap::new
+                ))
+                .entrySet().stream()
+                .sorted(Map.Entry.<UUID, Integer>comparingByValue().reversed())
+                .limit(10)
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (e1, e2) -> e1,
+                        LinkedHashMap::new
+                ));
+    }
+
+    private boolean isValidUUID(String str) {
+        try {
+            UUID.fromString(str);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
     }
 
     public class TopGUIListener implements Listener {
+        private final Map<UUID, Long> clickCooldowns = new HashMap<>();
+
         @EventHandler
         public void onInventoryClick(InventoryClickEvent event) {
-            if (!(event.getWhoClicked() instanceof Player)) return;
-            Player player = (Player) event.getWhoClicked();
+            if (!(event.getWhoClicked() instanceof Player player)) return;
 
-            String title = event.getView().getTitle();
-            if (!title.equals(plugin.topGuiTitle.replace("<month>", String.valueOf(LocalDate.now().getMonthValue()))) 
-                && !title.equals(plugin.TotalTitle)) {
+            String title = color.transalate(event.getView().getTitle());
+            String monthTopTitle = color.transalate(plugin.topGuiTitle.replace("<month>", String.valueOf(LocalDate.now().getMonthValue())));
+            String totalTopTitle = color.transalate(plugin.TotalTitle);
+
+            if (!title.equals(monthTopTitle) && !title.equals(totalTopTitle)) {
                 return;
             }
 
@@ -193,21 +214,34 @@ public class DiemDanhTop {
 
             if (event.getCurrentItem() == null) return;
 
-            if (title.equals(plugin.topGuiTitle.replace("<month>", String.valueOf(LocalDate.now().getMonthValue())))) {
+            // Chống spam click (Cooldown 500ms)
+            long now = System.currentTimeMillis();
+            if (clickCooldowns.containsKey(player.getUniqueId()) && now - clickCooldowns.get(player.getUniqueId()) < 500) {
+                return;
+            }
+            clickCooldowns.put(player.getUniqueId(), now);
+
+            if (title.equals(monthTopTitle)) {
                 ConfigurationSection nextPageSection = plugin.topGuiConfig.getConfigurationSection("NextPage");
                 if (nextPageSection != null) {
-                    String nextPageItemId = nextPageSection.getString("ID");
-                    if (nextPageItemId != null && event.getCurrentItem().getType() == XMaterial.matchXMaterial(nextPageItemId).get().parseMaterial()) {
+                    String nextPageItemId = nextPageSection.getString("ID", "BARRIER");
+                    XMaterial xMat = XMaterial.matchXMaterial(nextPageItemId).orElse(XMaterial.BARRIER);
+                    Material nextPageMat = xMat.parseMaterial();
+
+                    if (nextPageMat != null && event.getCurrentItem().getType() == nextPageMat) {
                         if (event.getSlot() == 53) {
                             openTopDiemDanhTongGUI(player);
                         }
                     }
                 }
-            } else if (title.equals(plugin.TotalTitle)) {
+            } else if (title.equals(totalTopTitle)) {
                 ConfigurationSection backPageSection = plugin.topGuiConfig.getConfigurationSection("BackPage");
                 if (backPageSection != null) {
-                    String backPageItemId = backPageSection.getString("ID");
-                    if (backPageItemId != null && event.getCurrentItem().getType() == XMaterial.matchXMaterial(backPageItemId).get().parseMaterial()) {
+                    String backPageItemId = backPageSection.getString("ID", "BARRIER");
+                    XMaterial xMat = XMaterial.matchXMaterial(backPageItemId).orElse(XMaterial.BARRIER);
+                    Material backPageMat = xMat.parseMaterial();
+
+                    if (backPageMat != null && event.getCurrentItem().getType() == backPageMat) {
                         if (event.getSlot() == 45) {
                             openTopDiemDanhGUI(player);
                         }

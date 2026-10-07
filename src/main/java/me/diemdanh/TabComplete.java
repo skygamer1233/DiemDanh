@@ -25,6 +25,9 @@ public class TabComplete implements TabCompleter {
                 if (sender.hasPermission("diemdanh.top")) {
                     completions.add("top");
                 }
+                if (sender.hasPermission("diemdanh.editor") || sender.hasPermission("diemdanh.admin")) {
+                    completions.add("editor");
+                }
             } else if (args.length == 2 && args[0].equalsIgnoreCase("giveticket")) {
                 for (Player player : Bukkit.getOnlinePlayers()) {
                     completions.add(player.getName());

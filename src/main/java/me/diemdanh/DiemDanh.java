@@ -1,6 +1,5 @@
 package me.diemdanh;
 
-
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -13,8 +12,6 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
-
-
 
 import java.io.File;
 import java.io.IOException;
@@ -33,19 +30,16 @@ public class DiemDanh extends JavaPlugin implements Listener {
     public String topGuiTitle;
     public String TotalTitle;
     public DiemDanhGUI diemDanhGUI;
-
-
-
+    public DiemDanhEditor diemDanhEditor;
 
     public String guiTitle;
     public FileConfiguration topGuiConfig;
     public File topGuiFile;
 
+    public File editorFile;
+    public FileConfiguration editorConfig;
+
     private Map<String, FileConfiguration> languageConfigs;
-
-
-
-
 
     @Override
     public void onEnable() {
@@ -59,7 +53,9 @@ public class DiemDanh extends JavaPlugin implements Listener {
         diemDanhTop = new DiemDanhTop(this);
         getServer().getPluginManager().registerEvents(diemDanhTop.new TopGUIListener(), this);
 
-
+        createEditorConfig();
+        diemDanhEditor = new DiemDanhEditor(this);
+        getServer().getPluginManager().registerEvents(diemDanhEditor, this);
 
         getLogger().info(color.transalate("&7--------------------------------------"));
         getLogger().info(color.transalate("&eDiemDanh Reloaded&a has been enabled"));
@@ -69,7 +65,6 @@ public class DiemDanh extends JavaPlugin implements Listener {
         loadLanguageFiles();
 
         guiTitle = color.transalate(getConfig().getString("Title", "&a&lĐiểm Danh Tháng "));
-
 
         updateConfigFile("topgui.yml");
         topGuiFile = new File(getDataFolder(), "topgui.yml");
@@ -81,44 +76,77 @@ public class DiemDanh extends JavaPlugin implements Listener {
         topGuiTitle = color.transalate(topGuiConfig.getString("TopTitle", "&c&lBảng Xếp Hạng Điểm Danh Tháng <month>"));
         TotalTitle = color.transalate(topGuiConfig.getString("TotalTitle", "&c&lBảng Xếp Hạng Điểm Danh Tổng"));
 
-
-
         playerDataFile = new File(getDataFolder(), "playerdata.yml");
         if (!playerDataFile.exists()) {
             saveResource("playerdata.yml", false);
         }
         playerData = YamlConfiguration.loadConfiguration(playerDataFile);
     }
+
+    public void createEditorConfig() {
+        editorFile = new File(getDataFolder(), "editor.yml");
+        if (!editorFile.exists()) {
+            saveResource("editor.yml", false);
+        }
+        editorConfig = YamlConfiguration.loadConfiguration(editorFile);
+    }
+
+    public FileConfiguration getEditorConfig() {
+        if (editorConfig == null) createEditorConfig();
+        return editorConfig;
+    }
+
+    // --- HÀM RELOAD TOÀN BỘ CẤU HÌNH PLUGIN ---
+    public void reloadAllConfigs() {
+        // 1. Reload config.yml
+        reloadConfig();
+        guiTitle = color.transalate(getConfig().getString("Title", "&a&lĐiểm Danh Tháng "));
+
+        // 2. Reload editor.yml & gọi DiemDanhEditor cập nhật lại GUI
+        createEditorConfig();
+        if (diemDanhEditor != null) {
+            diemDanhEditor.loadEditorConfig();
+        }
+
+        // 3. Reload topgui.yml
+        topGuiFile = new File(getDataFolder(), "topgui.yml");
+        if (topGuiFile.exists()) {
+            topGuiConfig = YamlConfiguration.loadConfiguration(topGuiFile);
+            topGuiTitle = color.transalate(topGuiConfig.getString("TopTitle", "&c&lBảng Xếp Hạng Điểm Danh Tháng <month>"));
+            TotalTitle = color.transalate(topGuiConfig.getString("TotalTitle", "&c&lBảng Xếp Hạng Điểm Danh Tổng"));
+        }
+
+        // 4. Reload playerdata.yml
+        playerDataFile = new File(getDataFolder(), "playerdata.yml");
+        if (playerDataFile.exists()) {
+            playerData = YamlConfiguration.loadConfiguration(playerDataFile);
+        }
+
+        // 5. Reload language files
+        loadLanguageFiles();
+    }
+
     private void updateConfigFile(String fileName) {
         File configFile = new File(getDataFolder(), fileName);
+        if (!configFile.exists()) {
+            saveResource(fileName, false);
+            return;
+        }
+
         FileConfiguration defaultConfig = YamlConfiguration.loadConfiguration(new File(getDataFolder(), fileName));
         int latestVersion = defaultConfig.getInt("version", 1);
+        FileConfiguration config = YamlConfiguration.loadConfiguration(configFile);
 
-        if (configFile.exists()) {
-            FileConfiguration config = YamlConfiguration.loadConfiguration(configFile);
-
-
-            if (!config.contains("version")) {
-                getLogger().info("Updating " + fileName + " to the latest version...");
-                File oldConfigFile = new File(getDataFolder(), fileName + "_old");
-                configFile.renameTo(oldConfigFile);
-                saveResource(fileName, false);
-            } else {
-                int currentVersion = config.getInt("version", 1);
-
-                if (currentVersion < latestVersion) {
-                    getLogger().info("Updating " + fileName + " from version " + currentVersion + " to " + latestVersion);
-                    File oldConfigFile = new File(getDataFolder(), fileName + "_old");
-                    configFile.renameTo(oldConfigFile);
-                    saveResource(fileName, false);
-                }
-            }
-        } else {
+        if (!config.contains("version") || config.getInt("version", 1) < latestVersion) {
+            getLogger().info("Updating " + fileName + " to the latest version...");
+            File oldConfigFile = new File(getDataFolder(), fileName + "_old");
+            configFile.renameTo(oldConfigFile);
             saveResource(fileName, false);
         }
     }
+
     private void loadLanguageFiles() {
-        languageConfigs = new HashMap<String, FileConfiguration>();
+        languageConfigs = new HashMap<>();
         File languageFolder = new File(getDataFolder(), "language");
 
         if (!languageFolder.exists()) {
@@ -133,33 +161,41 @@ public class DiemDanh extends JavaPlugin implements Listener {
             }
         }
 
-        for (File file : languageFolder.listFiles()) {
-            if (file.isFile() && file.getName().startsWith("message_") && file.getName().endsWith(".yml")) {
-                String langCode = file.getName().substring(8, file.getName().length() - 4);
-                FileConfiguration langConfig = YamlConfiguration.loadConfiguration(file);
-                languageConfigs.put(langCode, langConfig);
-                getLogger().info("Loaded language file: " + file.getName());
+        File[] files = languageFolder.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (file.isFile() && file.getName().startsWith("message_") && file.getName().endsWith(".yml")) {
+                    String langCode = file.getName().substring(8, file.getName().length() - 4);
+                    FileConfiguration langConfig = YamlConfiguration.loadConfiguration(file);
+                    languageConfigs.put(langCode, langConfig);
+                    getLogger().info("Loaded language file: " + file.getName());
+                }
             }
         }
     }
+
     public void reloadLanguageFiles() {
         loadLanguageFiles();
+        createEditorConfig();
     }
+
+    @Override
     public void onDisable() {
         getLogger().info(color.transalate("&7--------------------------------------"));
         getLogger().info(color.transalate("&eDiemDanh Reloaded&a has been disabled"));
         getLogger().info(color.transalate("&8Plugin by SkyGamer"));
         getLogger().info(color.transalate("&7--------------------------------------"));
     }
+
     public DiemDanhTop getDiemDanhTop() {
         return diemDanhTop;
     }
-    public DiemDanhGUI getDiemDanhGUI() { return diemDanhGUI;}
+
+    public DiemDanhGUI getDiemDanhGUI() { return diemDanhGUI; }
+    public DiemDanhEditor getDiemDanhEditor() { return diemDanhEditor; }
     public String getTopGuiTitle() {
         return topGuiTitle;
     }
-
-
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
@@ -201,8 +237,11 @@ public class DiemDanh extends JavaPlugin implements Listener {
 
         LocalDate lastCheckInDate = LocalDate.parse(playerData.getString(playerUUID + ".lastCheckIn", "1970-01-01"));
         if (today.getYear() != lastCheckInDate.getYear()) {
-            for (String key : playerData.getConfigurationSection(playerUUID + ".specialDays").getKeys(false)) {
-                playerData.set(playerUUID + ".specialDays." + key, false);
+            ConfigurationSection specialSec = playerData.getConfigurationSection(playerUUID + ".specialDays");
+            if (specialSec != null) {
+                for (String key : specialSec.getKeys(false)) {
+                    playerData.set(playerUUID + ".specialDays." + key, false);
+                }
             }
             savePlayerData();
         }
@@ -220,7 +259,6 @@ public class DiemDanh extends JavaPlugin implements Listener {
         int currentMonth = today.getMonthValue();
         int lastCheckInMonth = playerData.getInt(playerUUID + ".lastCheckInMonth", 0);
 
-
         if (currentMonth != lastCheckInMonth) {
             playerData.set(playerUUID + ".checkedDays", new ArrayList<>());
             playerData.set(playerUUID + ".daysCheckedIn", 0);
@@ -229,7 +267,6 @@ public class DiemDanh extends JavaPlugin implements Listener {
 
         List<Integer> missedDays = playerData.getIntegerList(playerUUID + ".missedDays");
         List<Integer> checkedDays = playerData.getIntegerList(playerUUID + ".checkedDays");
-
 
         for (int day = 1; day < today.getDayOfMonth(); day++) {
             if (!checkedDays.contains(day) && !missedDays.contains(day)) {
@@ -249,8 +286,6 @@ public class DiemDanh extends JavaPlugin implements Listener {
         }
     }
 
-
-
     public String getMessage(String key) {
         String language = getConfig().getString("language", "en");
         FileConfiguration langConfig = languageConfigs.get(language);
@@ -268,6 +303,4 @@ public class DiemDanh extends JavaPlugin implements Listener {
 
         return color.transalate(message);
     }
-
-
 }
