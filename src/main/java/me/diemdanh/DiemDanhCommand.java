@@ -62,10 +62,8 @@ public class DiemDanhCommand implements CommandExecutor {
                 return true;
             }
 
-            String targetPlayerUUID = targetPlayer.getUniqueId().toString();
-            int currentTickets = plugin.playerData.getInt(targetPlayerUUID + ".tickets", 0);
-            plugin.playerData.set(targetPlayerUUID + ".tickets", currentTickets + amount);
-            plugin.savePlayerData();
+            plugin.getPlayerDataManager().addTickets(targetPlayer.getUniqueId(), amount);
+            plugin.getPlayerDataManager().savePlayerDataAsync(targetPlayer.getUniqueId());
 
             String giveTicketSuccessMessage = plugin.getMessage("GiveTicketSuccess")
                     .replace("%amount%", String.valueOf(amount))

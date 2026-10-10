@@ -1,6 +1,7 @@
 package me.diemdanh;
 
 import com.cryptomorin.xseries.XMaterial;
+import me.diemdanh.holder.DiemDanhEditorHolder;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -12,6 +13,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
@@ -35,11 +37,13 @@ public class DiemDanhEditor implements Listener {
         public String configPath;
         public EditType editType;
         public String returnMenu;
+        public String title;
 
-        public EditSession(String configPath, EditType editType, String returnMenu) {
+        public EditSession(String configPath, EditType editType, String returnMenu, String title) {
             this.configPath = configPath;
             this.editType = editType;
             this.returnMenu = returnMenu;
+            this.title = title;
         }
     }
 
@@ -50,7 +54,6 @@ public class DiemDanhEditor implements Listener {
         loadEditorConfig();
     }
 
-    // --- TỰ NẠP FILE EDITOR.YML TRỰC TIẾP ---
     public void loadEditorConfig() {
         File file = new File(plugin.getDataFolder(), "editor.yml");
         if (!file.exists()) {
@@ -66,7 +69,6 @@ public class DiemDanhEditor implements Listener {
         return editorConfig;
     }
 
-    // --- HELPER LOAD ITEM TỪ EDITOR.YML ---
     private ItemStack createConfigItem(String path, Map<String, String> replacements, List<String> rewardList) {
         String matStr = getEditorConfig().getString(path + ".ID", "BARRIER");
         XMaterial xMat = XMaterial.matchXMaterial(matStr).orElse(XMaterial.BARRIER);
@@ -82,7 +84,7 @@ public class DiemDanhEditor implements Listener {
                     name = name.replace(entry.getKey(), entry.getValue());
                 }
             }
-            meta.setDisplayName(color.transalate(name));
+            meta.setDisplayName(ColorUtil.translate(name));
 
             List<String> rawLore = getEditorConfig().getStringList(path + ".Lore");
             List<String> finalLore = new ArrayList<>();
@@ -90,11 +92,11 @@ public class DiemDanhEditor implements Listener {
             for (String line : rawLore) {
                 if (line.equalsIgnoreCase("<rewards>")) {
                     if (rewardList == null || rewardList.isEmpty()) {
-                        finalLore.add(color.transalate(getEditorConfig().getString("Icons.NoRewardFormat", " &c(Chưa có lệnh)")));
+                        finalLore.add(ColorUtil.translate(getEditorConfig().getString("Icons.NoRewardFormat", " &c(Chưa có lệnh)")));
                     } else {
                         String format = getEditorConfig().getString("Icons.RewardFormat", " &e- /<command>");
                         for (String cmd : rewardList) {
-                            finalLore.add(color.transalate(format.replace("<command>", cmd)));
+                            finalLore.add(ColorUtil.translate(format.replace("<command>", cmd)));
                         }
                     }
                 } else {
@@ -103,7 +105,7 @@ public class DiemDanhEditor implements Listener {
                             line = line.replace(entry.getKey(), entry.getValue());
                         }
                     }
-                    finalLore.add(color.transalate(line));
+                    finalLore.add(ColorUtil.translate(line));
                 }
             }
             meta.setLore(finalLore);
@@ -121,7 +123,7 @@ public class DiemDanhEditor implements Listener {
                         line = line.replace(entry.getKey(), entry.getValue());
                     }
                 }
-                player.sendMessage(color.transalate(line));
+                player.sendMessage(ColorUtil.translate(line));
             }
         } else {
             String msg = getEditorConfig().getString("Messages." + messageKey, "");
@@ -130,14 +132,14 @@ public class DiemDanhEditor implements Listener {
                     msg = msg.replace(entry.getKey(), entry.getValue());
                 }
             }
-            player.sendMessage(color.transalate(msg));
+            player.sendMessage(ColorUtil.translate(msg));
         }
     }
 
     // --- 1. MENU CHÍNH ---
     public void openMainMenu(Player player) {
-        String title = color.transalate(getEditorConfig().getString("Title.MainMenu", "&8[&cDiemDanh Editor&8] &0Menu Chính"));
-        Inventory gui = Bukkit.createInventory(null, 27, title);
+        String title = ColorUtil.translate(getEditorConfig().getString("Title.MainMenu", "&8[&cDiemDanh Editor&8] &0Menu Chính"));
+        Inventory gui = Bukkit.createInventory(new DiemDanhEditorHolder(DiemDanhEditorHolder.MenuType.MAIN), 27, title);
 
         gui.setItem(11, createConfigItem("Icons.MainMenu.Days", null, null));
         gui.setItem(13, createConfigItem("Icons.MainMenu.TichLuy", null, null));
@@ -148,8 +150,8 @@ public class DiemDanhEditor implements Listener {
 
     // --- 2. MENU EDIT NGÀY THƯỜNG ---
     public void openDaysEditor(Player player) {
-        String title = color.transalate(getEditorConfig().getString("Title.DaysMenu", "&8[&cDiemDanh Editor&8] &0Ngày Thường"));
-        Inventory gui = Bukkit.createInventory(null, 45, title);
+        String title = ColorUtil.translate(getEditorConfig().getString("Title.DaysMenu", "&8[&cDiemDanh Editor&8] &0Ngày Thường"));
+        Inventory gui = Bukkit.createInventory(new DiemDanhEditorHolder(DiemDanhEditorHolder.MenuType.DAYS), 45, title);
 
         for (int day = 1; day <= 31; day++) {
             List<String> rewards = plugin.getConfig().getStringList("Days." + day + ".Reward");
@@ -165,8 +167,8 @@ public class DiemDanhEditor implements Listener {
 
     // --- 3. MENU EDIT TÍCH LŨY ---
     public void openTichLuyEditor(Player player) {
-        String title = color.transalate(getEditorConfig().getString("Title.TichLuyMenu", "&8[&cDiemDanh Editor&8] &0Tích Lũy"));
-        Inventory gui = Bukkit.createInventory(null, 27, title);
+        String title = ColorUtil.translate(getEditorConfig().getString("Title.TichLuyMenu", "&8[&cDiemDanh Editor&8] &0Tích Lũy"));
+        Inventory gui = Bukkit.createInventory(new DiemDanhEditorHolder(DiemDanhEditorHolder.MenuType.TICHLUY), 27, title);
 
         int[] mocs = {7, 14, 21};
         int[] slots = {11, 13, 15};
@@ -186,8 +188,8 @@ public class DiemDanhEditor implements Listener {
 
     // --- 4. MENU EDIT SPECIAL DAY ---
     public void openSpecialDayEditor(Player player) {
-        String title = color.transalate(getEditorConfig().getString("Title.SpecialDayMenu", "&8[&cDiemDanh Editor&8] &0Ngày Lễ"));
-        Inventory gui = Bukkit.createInventory(null, 54, title);
+        String title = ColorUtil.translate(getEditorConfig().getString("Title.SpecialDayMenu", "&8[&cDiemDanh Editor&8] &0Ngày Lễ"));
+        Inventory gui = Bukkit.createInventory(new DiemDanhEditorHolder(DiemDanhEditorHolder.MenuType.SPECIAL), 54, title);
 
         ConfigurationSection specialSec = plugin.getConfig().getConfigurationSection("SpecialDay");
         int slot = 0;
@@ -216,11 +218,12 @@ public class DiemDanhEditor implements Listener {
         player.openInventory(gui);
     }
 
-    // --- 5. MENU DANH SÁCH LỆNH & CẤU HÌNH NGÀY LỄ ---
+    // --- 5. MENU DANH SÁCH LỆNH ---
     public void openCommandEditor(Player player, String configPath, String title, String returnMenu) {
         String rawTitleFormat = getEditorConfig().getString("Title.CommandEditor", "&8[Editor] &0<title>");
-        String guiTitle = color.transalate(rawTitleFormat.replace("<title>", title));
-        Inventory gui = Bukkit.createInventory(null, 54, guiTitle);
+        String guiTitle = ColorUtil.translate(rawTitleFormat.replace("<title>", title));
+        String extraData = configPath + "::" + returnMenu + "::" + title;
+        Inventory gui = Bukkit.createInventory(new DiemDanhEditorHolder(DiemDanhEditorHolder.MenuType.COMMAND, extraData), 54, guiTitle);
 
         List<String> commands = plugin.getConfig().getStringList(configPath);
         for (int i = 0; i < commands.size(); i++) {
@@ -249,113 +252,106 @@ public class DiemDanhEditor implements Listener {
         player.openInventory(gui);
     }
 
-    // --- XỬ LÝ SỰ KIỆN CLICK GUI ---
+    @EventHandler
+    public void onInventoryDrag(InventoryDragEvent event) {
+        if (event.getInventory().getHolder() instanceof DiemDanhEditorHolder) {
+            event.setCancelled(true);
+        }
+    }
+
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player player)) return;
-
-        String title = color.transalate(event.getView().getTitle());
-        String mainMenuTitle = color.transalate(getEditorConfig().getString("Title.MainMenu", ""));
-        String daysMenuTitle = color.transalate(getEditorConfig().getString("Title.DaysMenu", ""));
-        String tichLuyMenuTitle = color.transalate(getEditorConfig().getString("Title.TichLuyMenu", ""));
-        String specialMenuTitle = color.transalate(getEditorConfig().getString("Title.SpecialDayMenu", ""));
-
-        String rawCmdFormat = getEditorConfig().getString("Title.CommandEditor", "");
-        String cmdEditorPrefix = color.transalate(rawCmdFormat.contains("<title>") ? rawCmdFormat.split("<title>")[0] : rawCmdFormat);
-
-        if (!title.equals(mainMenuTitle) && !title.equals(daysMenuTitle) && !title.equals(tichLuyMenuTitle)
-                && !title.equals(specialMenuTitle) && !title.startsWith(cmdEditorPrefix)) {
-            return;
-        }
+        if (!(event.getInventory().getHolder() instanceof DiemDanhEditorHolder holder)) return;
 
         event.setCancelled(true);
         int slot = event.getSlot();
         if (slot < 0 || event.getCurrentItem() == null) return;
 
-        // 1. Menu Chính
-        if (title.equals(mainMenuTitle)) {
-            if (slot == 11) openDaysEditor(player);
-            else if (slot == 13) openTichLuyEditor(player);
-            else if (slot == 15) openSpecialDayEditor(player);
-        }
-        // 2. Menu Ngày Thường
-        else if (title.equals(daysMenuTitle)) {
-            if (slot == 44) {
-                openMainMenu(player);
-            } else if (slot >= 0 && slot < 31) {
-                int day = slot + 1;
-                openCommandEditor(player, "Days." + day + ".Reward", "Ngày " + day, "DAYS");
+        switch (holder.getMenuType()) {
+            case MAIN -> {
+                if (slot == 11) openDaysEditor(player);
+                else if (slot == 13) openTichLuyEditor(player);
+                else if (slot == 15) openSpecialDayEditor(player);
             }
-        }
-        // 3. Menu Tích Lũy
-        else if (title.equals(tichLuyMenuTitle)) {
-            if (slot == 26) {
-                openMainMenu(player);
-            } else if (slot == 11) openCommandEditor(player, "TichLuy.7ngay.Reward", "Tích Lũy 7 Ngày", "TICHLUY");
-            else if (slot == 13) openCommandEditor(player, "TichLuy.14ngay.Reward", "Tích Lũy 14 Ngày", "TICHLUY");
-            else if (slot == 15) openCommandEditor(player, "TichLuy.21ngay.Reward", "Tích Lũy 21 Ngày", "TICHLUY");
-        }
-        // 4. Menu Ngày Lễ
-        else if (title.equals(specialMenuTitle)) {
-            if (slot == 53) {
-                openMainMenu(player);
-            } else if (slot == 48) {
-                player.closeInventory();
-                activeSessions.put(player.getUniqueId(), new EditSession(null, EditType.CREATE_SPECIAL_DAY, "SPECIAL"));
-                sendMessage(player, "CreateSpecialPrompt", null);
-            } else if (slot < 45) {
-                ItemStack item = event.getCurrentItem();
-                if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
-                    String rawDisplayName = ChatColor.stripColor(item.getItemMeta().getDisplayName());
-                    String keyName = rawDisplayName.replace("Key: ", "").trim();
-                    if (event.isRightClick()) {
-                        plugin.getConfig().set("SpecialDay." + keyName, null);
-                        plugin.saveConfig();
-                        Map<String, String> rep = new HashMap<>();
-                        rep.put("<key>", keyName);
-                        sendMessage(player, "DeleteSpecialSuccess", rep);
-                        openSpecialDayEditor(player);
-                    } else {
-                        openCommandEditor(player, "SpecialDay." + keyName + ".Reward", "Lễ " + keyName, "SPECIAL");
+            case DAYS -> {
+                if (slot == 44) {
+                    openMainMenu(player);
+                } else if (slot >= 0 && slot < 31) {
+                    int day = slot + 1;
+                    openCommandEditor(player, "Days." + day + ".Reward", "Ngày " + day, "DAYS");
+                }
+            }
+            case TICHLUY -> {
+                if (slot == 26) {
+                    openMainMenu(player);
+                } else if (slot == 11) openCommandEditor(player, "TichLuy.7ngay.Reward", "Tích Lũy 7 Ngày", "TICHLUY");
+                else if (slot == 13) openCommandEditor(player, "TichLuy.14ngay.Reward", "Tích Lũy 14 Ngày", "TICHLUY");
+                else if (slot == 15) openCommandEditor(player, "TichLuy.21ngay.Reward", "Tích Lũy 21 Ngày", "TICHLUY");
+            }
+            case SPECIAL -> {
+                if (slot == 53) {
+                    openMainMenu(player);
+                } else if (slot == 48) {
+                    player.closeInventory();
+                    activeSessions.put(player.getUniqueId(), new EditSession(null, EditType.CREATE_SPECIAL_DAY, "SPECIAL", "Ngày Lễ"));
+                    sendMessage(player, "CreateSpecialPrompt", null);
+                } else if (slot < 45) {
+                    ItemStack item = event.getCurrentItem();
+                    if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
+                        String rawDisplayName = ChatColor.stripColor(item.getItemMeta().getDisplayName());
+                        String keyName = rawDisplayName.replace("Key: ", "").trim();
+                        if (event.isRightClick()) {
+                            plugin.getConfig().set("SpecialDay." + keyName, null);
+                            plugin.saveConfig();
+                            Map<String, String> rep = new HashMap<>();
+                            rep.put("<key>", keyName);
+                            sendMessage(player, "DeleteSpecialSuccess", rep);
+                            openSpecialDayEditor(player);
+                        } else {
+                            openCommandEditor(player, "SpecialDay." + keyName + ".Reward", "Lễ " + keyName, "SPECIAL");
+                        }
                     }
                 }
             }
-        }
-        // 5. Menu Command & Spec Editor
-        else if (title.startsWith(cmdEditorPrefix)) {
-            String pathTitle = title.replace(cmdEditorPrefix, "");
-            String configPath = getPathFromTitle(pathTitle);
+            case COMMAND -> {
+                String extra = holder.getExtraData();
+                String[] parts = extra.split("::");
+                String configPath = parts.length > 0 ? parts[0] : "";
+                String returnMenu = parts.length > 1 ? parts[1] : "MAIN";
+                String title = parts.length > 2 ? parts[2] : "";
 
-            if (slot == 53) {
-                if (pathTitle.startsWith("Ngày")) openDaysEditor(player);
-                else if (pathTitle.startsWith("Tích Lũy")) openTichLuyEditor(player);
-                else openSpecialDayEditor(player);
-            } else if (slot == 49) {
-                player.closeInventory();
-                String returnMenu = pathTitle.startsWith("Ngày") ? "DAYS" : (pathTitle.startsWith("Tích Lũy") ? "TICHLUY" : "SPECIAL");
-                activeSessions.put(player.getUniqueId(), new EditSession(configPath, EditType.ADD_COMMAND, returnMenu));
-                sendMessage(player, "AddCommandPrompt", null);
-            } else if (slot == 50 && pathTitle.startsWith("Lễ ")) {
-                String key = pathTitle.replace("Lễ ", "");
-                player.closeInventory();
-                activeSessions.put(player.getUniqueId(), new EditSession("SpecialDay." + key + ".Icon.NgayDiemDanh.Name", EditType.CHANGE_DISPLAY_NAME, "SPECIAL"));
-                sendMessage(player, "ChangeNamePrompt", null);
-            } else if (slot < 45) {
-                List<String> cmds = plugin.getConfig().getStringList(configPath);
-                if (slot < cmds.size()) {
-                    String removed = cmds.remove(slot);
-                    plugin.getConfig().set(configPath, cmds);
-                    plugin.saveConfig();
-                    Map<String, String> rep = new HashMap<>();
-                    rep.put("<command>", removed);
-                    sendMessage(player, "DeleteCommandSuccess", rep);
-                    openCommandEditor(player, configPath, pathTitle, pathTitle.startsWith("Lễ ") ? "SPECIAL" : "");
+                if (slot == 53) {
+                    if (returnMenu.equals("DAYS")) openDaysEditor(player);
+                    else if (returnMenu.equals("TICHLUY")) openTichLuyEditor(player);
+                    else if (returnMenu.equals("SPECIAL")) openSpecialDayEditor(player);
+                    else openMainMenu(player);
+                } else if (slot == 49) {
+                    player.closeInventory();
+                    activeSessions.put(player.getUniqueId(), new EditSession(configPath, EditType.ADD_COMMAND, returnMenu, title));
+                    sendMessage(player, "AddCommandPrompt", null);
+                } else if (slot == 50 && returnMenu.equals("SPECIAL") && title.startsWith("Lễ ")) {
+                    String key = title.replace("Lễ ", "");
+                    player.closeInventory();
+                    activeSessions.put(player.getUniqueId(), new EditSession("SpecialDay." + key + ".Icon.NgayDiemDanh.Name", EditType.CHANGE_DISPLAY_NAME, "SPECIAL", title));
+                    sendMessage(player, "ChangeNamePrompt", null);
+                } else if (slot < 45) {
+                    List<String> cmds = plugin.getConfig().getStringList(configPath);
+                    if (slot < cmds.size()) {
+                        String removed = cmds.remove(slot);
+                        plugin.getConfig().set(configPath, cmds);
+                        plugin.saveConfig();
+                        Map<String, String> rep = new HashMap<>();
+                        rep.put("<command>", removed);
+                        sendMessage(player, "DeleteCommandSuccess", rep);
+                        openCommandEditor(player, configPath, title, returnMenu);
+                    }
                 }
             }
         }
     }
 
-    // --- XỬ LÝ NHẬP CHAT ---
+    // --- XỬ LÝ NHẬP CHAT AN TOÀN LUỒNG (THREAD-SAFE) ---
     @EventHandler(priority = EventPriority.LOWEST)
     public void onChat(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();
@@ -365,58 +361,61 @@ public class DiemDanhEditor implements Listener {
         EditSession session = activeSessions.remove(player.getUniqueId());
         String msg = event.getMessage().trim();
 
-        if (msg.equalsIgnoreCase("cancel")) {
-            sendMessage(player, "Cancel", null);
-            reopenMenuAsync(player, session);
-            return;
-        }
-
-        if (session.editType == EditType.ADD_COMMAND) {
-            List<String> cmds = plugin.getConfig().getStringList(session.configPath);
-            cmds.add(msg);
-            plugin.getConfig().set(session.configPath, cmds);
-            plugin.saveConfig();
-            Map<String, String> rep = new HashMap<>();
-            rep.put("<command>", msg);
-            sendMessage(player, "AddCommandSuccess", rep);
-            reopenMenuAsync(player, session);
-        } else if (session.editType == EditType.CHANGE_DISPLAY_NAME) {
-            plugin.getConfig().set(session.configPath, msg);
-            plugin.saveConfig();
-            Map<String, String> rep = new HashMap<>();
-            rep.put("<name>", msg);
-            sendMessage(player, "ChangeNameSuccess", rep);
-            reopenMenuAsync(player, session);
-        } else if (session.editType == EditType.CREATE_SPECIAL_DAY) {
-            String[] args = msg.split(" ");
-            if (args.length < 3) {
-                sendMessage(player, "CreateSpecialSyntaxError", null);
-                reopenMenuAsync(player, session);
+        // Đẩy toàn bộ tác vụ sửa config và lưu đĩa về Main Thread
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            if (msg.equalsIgnoreCase("cancel")) {
+                sendMessage(player, "Cancel", null);
+                reopenMenu(player, session);
                 return;
             }
-            try {
-                String key = args[0];
-                int date = Integer.parseInt(args[1]);
-                int month = Integer.parseInt(args[2]);
 
-                String path = "SpecialDay." + key;
-                plugin.getConfig().set(path + ".Require.Date", date);
-                plugin.getConfig().set(path + ".Require.Month", month);
-                plugin.getConfig().set(path + ".Icon.NgayDiemDanh.ID", "SUNFLOWER");
-                plugin.getConfig().set(path + ".Icon.NgayDiemDanh.Name", "&e" + key);
-                plugin.getConfig().set(path + ".Reward", new ArrayList<String>());
-
+            if (session.editType == EditType.ADD_COMMAND) {
+                List<String> cmds = plugin.getConfig().getStringList(session.configPath);
+                cmds.add(msg);
+                plugin.getConfig().set(session.configPath, cmds);
                 plugin.saveConfig();
                 Map<String, String> rep = new HashMap<>();
-                rep.put("<key>", key);
-                rep.put("<date>", String.valueOf(date));
-                rep.put("<month>", String.valueOf(month));
-                sendMessage(player, "CreateSpecialSuccess", rep);
-            } catch (NumberFormatException e) {
-                sendMessage(player, "CreateSpecialNumberError", null);
+                rep.put("<command>", msg);
+                sendMessage(player, "AddCommandSuccess", rep);
+                reopenMenu(player, session);
+            } else if (session.editType == EditType.CHANGE_DISPLAY_NAME) {
+                plugin.getConfig().set(session.configPath, msg);
+                plugin.saveConfig();
+                Map<String, String> rep = new HashMap<>();
+                rep.put("<name>", msg);
+                sendMessage(player, "ChangeNameSuccess", rep);
+                reopenMenu(player, session);
+            } else if (session.editType == EditType.CREATE_SPECIAL_DAY) {
+                String[] args = msg.split(" ");
+                if (args.length < 3) {
+                    sendMessage(player, "CreateSpecialSyntaxError", null);
+                    reopenMenu(player, session);
+                    return;
+                }
+                try {
+                    String key = args[0];
+                    int date = Integer.parseInt(args[1]);
+                    int month = Integer.parseInt(args[2]);
+
+                    String path = "SpecialDay." + key;
+                    plugin.getConfig().set(path + ".Require.Date", date);
+                    plugin.getConfig().set(path + ".Require.Month", month);
+                    plugin.getConfig().set(path + ".Icon.NgayDiemDanh.ID", "SUNFLOWER");
+                    plugin.getConfig().set(path + ".Icon.NgayDiemDanh.Name", "&e" + key);
+                    plugin.getConfig().set(path + ".Reward", new ArrayList<String>());
+
+                    plugin.saveConfig();
+                    Map<String, String> rep = new HashMap<>();
+                    rep.put("<key>", key);
+                    rep.put("<date>", String.valueOf(date));
+                    rep.put("<month>", String.valueOf(month));
+                    sendMessage(player, "CreateSpecialSuccess", rep);
+                } catch (NumberFormatException e) {
+                    sendMessage(player, "CreateSpecialNumberError", null);
+                }
+                reopenMenu(player, session);
             }
-            reopenMenuAsync(player, session);
-        }
+        });
     }
 
     @EventHandler
@@ -424,58 +423,37 @@ public class DiemDanhEditor implements Listener {
         activeSessions.remove(event.getPlayer().getUniqueId());
     }
 
-    private void reopenMenuAsync(Player player, EditSession session) {
-        Bukkit.getScheduler().runTask(plugin, () -> {
-            if (session.editType == EditType.CREATE_SPECIAL_DAY) {
-                openSpecialDayEditor(player);
-            } else if (session.returnMenu.equals("SPECIAL")) {
-                if (session.configPath != null && session.configPath.startsWith("SpecialDay.")) {
-                    String[] parts = session.configPath.split("\\.");
-                    if (parts.length >= 2) {
-                        String key = parts[1];
-                        openCommandEditor(player, "SpecialDay." + key + ".Reward", "Lễ " + key, "SPECIAL");
-                        return;
-                    }
+    private void reopenMenu(Player player, EditSession session) {
+        if (session.editType == EditType.CREATE_SPECIAL_DAY) {
+            openSpecialDayEditor(player);
+        } else if (session.returnMenu.equals("SPECIAL")) {
+            if (session.configPath != null && session.configPath.startsWith("SpecialDay.")) {
+                String[] parts = session.configPath.split("\\.");
+                if (parts.length >= 2) {
+                    String key = parts[1];
+                    openCommandEditor(player, "SpecialDay." + key + ".Reward", "Lễ " + key, "SPECIAL");
+                    return;
                 }
-                openSpecialDayEditor(player);
-            } else if (session.returnMenu.equals("DAYS")) {
-                if (session.configPath != null && session.configPath.startsWith("Days.")) {
-                    String[] parts = session.configPath.split("\\.");
-                    if (parts.length >= 2) {
-                        String day = parts[1];
-                        openCommandEditor(player, "Days." + day + ".Reward", "Ngày " + day, "DAYS");
-                        return;
-                    }
-                }
-                openDaysEditor(player);
-            } else if (session.returnMenu.equals("TICHLUY")) {
-                if (session.configPath != null && session.configPath.startsWith("TichLuy.")) {
-                    String[] parts = session.configPath.split("\\.");
-                    if (parts.length >= 2) {
-                        String mocKey = parts[1];
-                        String title = "Tích Lũy " + mocKey.replace("ngay", "") + " Ngày";
-                        openCommandEditor(player, session.configPath, title, "TICHLUY");
-                        return;
-                    }
-                }
-                openTichLuyEditor(player);
-            } else {
-                openMainMenu(player);
             }
-        });
-    }
-
-    private String getPathFromTitle(String pathTitle) {
-        if (pathTitle.startsWith("Ngày ")) {
-            int day = Integer.parseInt(pathTitle.replace("Ngày ", ""));
-            return "Days." + day + ".Reward";
-        } else if (pathTitle.equals("Tích Lũy 7 Ngày")) return "TichLuy.7ngay.Reward";
-        else if (pathTitle.equals("Tích Lũy 14 Ngày")) return "TichLuy.14ngay.Reward";
-        else if (pathTitle.equals("Tích Lũy 21 Ngày")) return "TichLuy.21ngay.Reward";
-        else if (pathTitle.startsWith("Lễ ")) {
-            String key = pathTitle.replace("Lễ ", "");
-            return "SpecialDay." + key + ".Reward";
+            openSpecialDayEditor(player);
+        } else if (session.returnMenu.equals("DAYS")) {
+            if (session.configPath != null && session.configPath.startsWith("Days.")) {
+                String[] parts = session.configPath.split("\\.");
+                if (parts.length >= 2) {
+                    String day = parts[1];
+                    openCommandEditor(player, "Days." + day + ".Reward", "Ngày " + day, "DAYS");
+                    return;
+                }
+            }
+            openDaysEditor(player);
+        } else if (session.returnMenu.equals("TICHLUY")) {
+            if (session.configPath != null && session.configPath.startsWith("TichLuy.")) {
+                openCommandEditor(player, session.configPath, session.title, "TICHLUY");
+                return;
+            }
+            openTichLuyEditor(player);
+        } else {
+            openMainMenu(player);
         }
-        return "";
     }
 }
