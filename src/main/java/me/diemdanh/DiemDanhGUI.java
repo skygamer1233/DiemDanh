@@ -48,7 +48,6 @@ public class DiemDanhGUI implements Listener {
             plugin.getLogger().severe("Missing 'Days' section in config.yml");
             return;
         }
-        List<?> dayEntries = new ArrayList<>(daysSection.getValues(false).values());
 
         // 1. Render Special Day
         ConfigurationSection specialSection = plugin.getConfig().getConfigurationSection("SpecialDay");
@@ -85,14 +84,7 @@ public class DiemDanhGUI implements Listener {
                 continue;
             }
 
-            List<String> lore = new ArrayList<>();
-            if (day - 1 < dayEntries.size()) {
-                Object dayEntry = dayEntries.get(day - 1);
-                if (dayEntry instanceof ConfigurationSection ds && ds.contains("Lore")) {
-                    lore = ds.getStringList("Lore");
-                }
-            }
-
+            List<String> lore = plugin.getConfig().getStringList("Days." + day + ".Lore");
             if (lore.isEmpty() && !itemKey.equals("DiemDanhBu")) {
                 lore = itemSection.getStringList("Lore");
             }

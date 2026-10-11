@@ -30,7 +30,9 @@ public class DiemDanhEditor implements Listener {
     public enum EditType {
         ADD_COMMAND,
         CREATE_SPECIAL_DAY,
-        CHANGE_DISPLAY_NAME
+        CHANGE_DISPLAY_NAME,
+        ADD_LORE_LINE,
+        EDIT_LORE_LINE
     }
 
     public static class EditSession {
@@ -38,12 +40,20 @@ public class DiemDanhEditor implements Listener {
         public EditType editType;
         public String returnMenu;
         public String title;
+        public int lineIndex;
+        public String extra;
 
         public EditSession(String configPath, EditType editType, String returnMenu, String title) {
+            this(configPath, editType, returnMenu, title, -1, "");
+        }
+
+        public EditSession(String configPath, EditType editType, String returnMenu, String title, int lineIndex, String extra) {
             this.configPath = configPath;
             this.editType = editType;
             this.returnMenu = returnMenu;
             this.title = title;
+            this.lineIndex = lineIndex;
+            this.extra = extra != null ? extra : "";
         }
     }
 
@@ -69,7 +79,57 @@ public class DiemDanhEditor implements Listener {
         return editorConfig;
     }
 
-    private ItemStack createConfigItem(String path, Map<String, String> replacements, List<String> rewardList) {
+    public List<String> getLoreFromConfig(String configPath) {
+        List<String> lores = plugin.getConfig().getStringList(configPath);
+        if (!lores.isEmpty()) {
+            return new ArrayList<>(lores);
+        }
+
+        // Fallback đọc từ Icon nếu chưa tạo trực tiếp path TichLuy.<moc>ngay.Lore
+        if (configPath.startsWith("TichLuy.") && configPath.endsWith(".Lore")) {
+            String base = configPath.substring(0, configPath.length() - 5);
+            lores = plugin.getConfig().getStringList(base + ".Icon.NhanQua.Lore");
+            if (lores.isEmpty()) {
+                lores = plugin.getConfig().getStringList(base + ".Icon.ChuaNhanQua.Lore");
+            }
+        }
+        // Fallback đọc từ Icon nếu chưa tạo trực tiếp path SpecialDay.<key>.Lore
+        else if (configPath.startsWith("SpecialDay.") && configPath.endsWith(".Lore")) {
+            String base = configPath.substring(0, configPath.length() - 5);
+            lores = plugin.getConfig().getStringList(base + ".Icon.NgayDiemDanh.Lore");
+            if (lores.isEmpty()) {
+                lores = plugin.getConfig().getStringList(base + ".Icon.DiemDanh.Lore");
+            }
+        }
+
+        return new ArrayList<>(lores);
+    }
+
+    public void saveLoreToConfig(String configPath, List<String> lores) {
+        plugin.getConfig().set(configPath, lores);
+
+        // Đồng bộ các trạng thái Icon của TichLuy (ChuaNhanQua, NhanQua, DaNhanQua)
+        if (configPath.startsWith("TichLuy.") && configPath.endsWith(".Lore")) {
+            String base = configPath.substring(0, configPath.length() - 5);
+            plugin.getConfig().set(base + ".Icon.ChuaNhanQua.Lore", lores);
+            plugin.getConfig().set(base + ".Icon.NhanQua.Lore", lores);
+            plugin.getConfig().set(base + ".Icon.DaNhanQua.Lore", lores);
+        }
+        // Đồng bộ các trạng thái Icon của SpecialDay
+        else if (configPath.startsWith("SpecialDay.") && configPath.endsWith(".Lore")) {
+            String base = configPath.substring(0, configPath.length() - 5);
+            ConfigurationSection iconSec = plugin.getConfig().getConfigurationSection(base + ".Icon");
+            if (iconSec != null) {
+                for (String iconKey : iconSec.getKeys(false)) {
+                    plugin.getConfig().set(base + ".Icon." + iconKey + ".Lore", lores);
+                }
+            }
+        }
+
+        plugin.saveConfig();
+    }
+
+    private ItemStack createConfigItem(String path, Map<String, String> replacements, List<String> rewardList, List<String> loreList) {
         String matStr = getEditorConfig().getString(path + ".ID", "BARRIER");
         XMaterial xMat = XMaterial.matchXMaterial(matStr).orElse(XMaterial.BARRIER);
         Material mat = xMat.parseMaterial();
@@ -97,6 +157,15 @@ public class DiemDanhEditor implements Listener {
                         String format = getEditorConfig().getString("Icons.RewardFormat", " &e- /<command>");
                         for (String cmd : rewardList) {
                             finalLore.add(ColorUtil.translate(format.replace("<command>", cmd)));
+                        }
+                    }
+                } else if (line.equalsIgnoreCase("<lores>")) {
+                    if (loreList == null || loreList.isEmpty()) {
+                        finalLore.add(ColorUtil.translate(getEditorConfig().getString("Icons.NoLoreFormat", " &c(Chưa có dòng mô tả)")));
+                    } else {
+                        String format = getEditorConfig().getString("Icons.LoreFormat", " &f- <lore>");
+                        for (String l : loreList) {
+                            finalLore.add(ColorUtil.translate(format.replace("<lore>", l)));
                         }
                     }
                 } else {
@@ -141,9 +210,9 @@ public class DiemDanhEditor implements Listener {
         String title = ColorUtil.translate(getEditorConfig().getString("Title.MainMenu", "&8[&cDiemDanh Editor&8] &0Menu Chính"));
         Inventory gui = Bukkit.createInventory(new DiemDanhEditorHolder(DiemDanhEditorHolder.MenuType.MAIN), 27, title);
 
-        gui.setItem(11, createConfigItem("Icons.MainMenu.Days", null, null));
-        gui.setItem(13, createConfigItem("Icons.MainMenu.TichLuy", null, null));
-        gui.setItem(15, createConfigItem("Icons.MainMenu.SpecialDay", null, null));
+        gui.setItem(11, createConfigItem("Icons.MainMenu.Days", null, null, null));
+        gui.setItem(13, createConfigItem("Icons.MainMenu.TichLuy", null, null, null));
+        gui.setItem(15, createConfigItem("Icons.MainMenu.SpecialDay", null, null, null));
 
         player.openInventory(gui);
     }
@@ -155,13 +224,14 @@ public class DiemDanhEditor implements Listener {
 
         for (int day = 1; day <= 31; day++) {
             List<String> rewards = plugin.getConfig().getStringList("Days." + day + ".Reward");
+            List<String> lores = getLoreFromConfig("Days." + day + ".Lore");
             Map<String, String> rep = new HashMap<>();
             rep.put("<day>", String.valueOf(day));
 
-            gui.setItem(day - 1, createConfigItem("Icons.DaysMenu.DayItem", rep, rewards));
+            gui.setItem(day - 1, createConfigItem("Icons.DaysMenu.DayItem", rep, rewards, lores));
         }
 
-        gui.setItem(44, createConfigItem("Icons.DaysMenu.Back", null, null));
+        gui.setItem(44, createConfigItem("Icons.DaysMenu.Back", null, null, null));
         player.openInventory(gui);
     }
 
@@ -176,13 +246,14 @@ public class DiemDanhEditor implements Listener {
         for (int i = 0; i < mocs.length; i++) {
             int moc = mocs[i];
             List<String> rewards = plugin.getConfig().getStringList("TichLuy." + moc + "ngay.Reward");
+            List<String> lores = getLoreFromConfig("TichLuy." + moc + "ngay.Lore");
             Map<String, String> rep = new HashMap<>();
             rep.put("<moc>", String.valueOf(moc));
 
-            gui.setItem(slots[i], createConfigItem("Icons.TichLuyMenu.Item", rep, rewards));
+            gui.setItem(slots[i], createConfigItem("Icons.TichLuyMenu.Item", rep, rewards, lores));
         }
 
-        gui.setItem(26, createConfigItem("Icons.TichLuyMenu.Back", null, null));
+        gui.setItem(26, createConfigItem("Icons.TichLuyMenu.Back", null, null, null));
         player.openInventory(gui);
     }
 
@@ -200,6 +271,7 @@ public class DiemDanhEditor implements Listener {
                 int month = plugin.getConfig().getInt("SpecialDay." + key + ".Require.Month");
                 String displayName = plugin.getConfig().getString("SpecialDay." + key + ".Icon.NgayDiemDanh.Name", "&e" + key);
                 List<String> rewards = plugin.getConfig().getStringList("SpecialDay." + key + ".Reward");
+                List<String> lores = getLoreFromConfig("SpecialDay." + key + ".Lore");
 
                 Map<String, String> rep = new HashMap<>();
                 rep.put("<key>", key);
@@ -207,20 +279,20 @@ public class DiemDanhEditor implements Listener {
                 rep.put("<date>", String.valueOf(date));
                 rep.put("<month>", String.valueOf(month));
 
-                gui.setItem(slot, createConfigItem("Icons.SpecialDayMenu.SpecialItem", rep, rewards));
+                gui.setItem(slot, createConfigItem("Icons.SpecialDayMenu.SpecialItem", rep, rewards, lores));
                 slot++;
             }
         }
 
-        gui.setItem(48, createConfigItem("Icons.SpecialDayMenu.CreateNew", null, null));
-        gui.setItem(53, createConfigItem("Icons.SpecialDayMenu.Back", null, null));
+        gui.setItem(48, createConfigItem("Icons.SpecialDayMenu.CreateNew", null, null, null));
+        gui.setItem(53, createConfigItem("Icons.SpecialDayMenu.Back", null, null, null));
 
         player.openInventory(gui);
     }
 
-    // --- 5. MENU DANH SÁCH LỆNH ---
+    // --- 5. MENU DANH SÁCH LỆNH (COMMAND EDITOR) ---
     public void openCommandEditor(Player player, String configPath, String title, String returnMenu) {
-        String rawTitleFormat = getEditorConfig().getString("Title.CommandEditor", "&8[Editor] &0<title>");
+        String rawTitleFormat = getEditorConfig().getString("Title.CommandEditor", "&8[Editor Lệnh] &0<title>");
         String guiTitle = ColorUtil.translate(rawTitleFormat.replace("<title>", title));
         String extraData = configPath + "::" + returnMenu + "::" + title;
         Inventory gui = Bukkit.createInventory(new DiemDanhEditorHolder(DiemDanhEditorHolder.MenuType.COMMAND, extraData), 54, guiTitle);
@@ -233,21 +305,59 @@ public class DiemDanhEditor implements Listener {
             rep.put("<index>", String.valueOf(i + 1));
             rep.put("<command>", cmd);
 
-            gui.setItem(i, createConfigItem("Icons.CommandEditor.CmdItem", rep, null));
+            gui.setItem(i, createConfigItem("Icons.CommandEditor.CmdItem", rep, null, null));
         }
 
-        gui.setItem(49, createConfigItem("Icons.CommandEditor.AddCmd", null, null));
+        gui.setItem(49, createConfigItem("Icons.CommandEditor.AddCmd", null, null, null));
 
-        if (returnMenu.equals("SPECIAL") && title.startsWith("Lễ ")) {
+        // Nút chuyển sang sửa Lore
+        if (returnMenu.equals("DAYS") && title.startsWith("Ngày ")) {
+            gui.setItem(50, createConfigItem("Icons.CommandEditor.SwitchLore", null, null, null));
+        } else if (returnMenu.equals("TICHLUY") && title.startsWith("Tích Lũy ")) {
+            gui.setItem(50, createConfigItem("Icons.CommandEditor.SwitchLore", null, null, null));
+        } else if (returnMenu.equals("SPECIAL") && title.startsWith("Lễ ")) {
             String key = title.replace("Lễ ", "");
             String currentDisplayName = plugin.getConfig().getString("SpecialDay." + key + ".Icon.NgayDiemDanh.Name", "&e" + key);
             Map<String, String> rep = new HashMap<>();
             rep.put("<display_name>", currentDisplayName);
 
-            gui.setItem(50, createConfigItem("Icons.CommandEditor.ChangeNameTag", rep, null));
+            gui.setItem(50, createConfigItem("Icons.CommandEditor.ChangeNameTag", rep, null, null));
+            gui.setItem(51, createConfigItem("Icons.CommandEditor.SwitchLore", null, null, null));
         }
 
-        gui.setItem(53, createConfigItem("Icons.CommandEditor.Back", null, null));
+        gui.setItem(53, createConfigItem("Icons.CommandEditor.Back", null, null, null));
+
+        player.openInventory(gui);
+    }
+
+    // --- 6. MENU CHỈNH SỬA TỪNG DÒNG LORE (LORE EDITOR) ---
+    public void openLoreEditor(Player player, String configPath, String title, String returnMenu) {
+        String rawTitleFormat = getEditorConfig().getString("Title.LoreEditor", "&8[Editor Lore] &0<title>");
+        String guiTitle = ColorUtil.translate(rawTitleFormat.replace("<title>", title));
+        String extraData = configPath + "::" + returnMenu + "::" + title;
+        Inventory gui = Bukkit.createInventory(new DiemDanhEditorHolder(DiemDanhEditorHolder.MenuType.LORE, extraData), 54, guiTitle);
+
+        List<String> lores = getLoreFromConfig(configPath);
+        for (int i = 0; i < lores.size(); i++) {
+            if (i >= 45) break;
+            String line = lores.get(i);
+            Map<String, String> rep = new HashMap<>();
+            rep.put("<index>", String.valueOf(i + 1));
+            rep.put("<lore_line>", line);
+
+            gui.setItem(i, createConfigItem("Icons.LoreEditor.LoreItem", rep, null, null));
+        }
+
+        // Slot 48: Nút chuyển sang sửa Lệnh Thưởng
+        if (returnMenu.equals("DAYS") || returnMenu.equals("TICHLUY") || returnMenu.equals("SPECIAL")) {
+            gui.setItem(48, createConfigItem("Icons.LoreEditor.SwitchReward", null, null, null));
+        }
+
+        // Slot 49: Nút thêm dòng Lore mới
+        gui.setItem(49, createConfigItem("Icons.LoreEditor.AddLine", null, null, null));
+
+        // Slot 53: Nút quay lại
+        gui.setItem(53, createConfigItem("Icons.LoreEditor.Back", null, null, null));
 
         player.openInventory(gui);
     }
@@ -279,15 +389,28 @@ public class DiemDanhEditor implements Listener {
                     openMainMenu(player);
                 } else if (slot >= 0 && slot < 31) {
                     int day = slot + 1;
-                    openCommandEditor(player, "Days." + day + ".Reward", "Ngày " + day, "DAYS");
+                    if (event.isRightClick()) {
+                        openLoreEditor(player, "Days." + day + ".Lore", "Ngày " + day, "DAYS");
+                    } else {
+                        openCommandEditor(player, "Days." + day + ".Reward", "Ngày " + day, "DAYS");
+                    }
                 }
             }
             case TICHLUY -> {
                 if (slot == 26) {
                     openMainMenu(player);
-                } else if (slot == 11) openCommandEditor(player, "TichLuy.7ngay.Reward", "Tích Lũy 7 Ngày", "TICHLUY");
-                else if (slot == 13) openCommandEditor(player, "TichLuy.14ngay.Reward", "Tích Lũy 14 Ngày", "TICHLUY");
-                else if (slot == 15) openCommandEditor(player, "TichLuy.21ngay.Reward", "Tích Lũy 21 Ngày", "TICHLUY");
+                } else if (slot == 11 || slot == 13 || slot == 15) {
+                    int moc = (slot == 11) ? 7 : (slot == 13 ? 14 : 21);
+                    String pathReward = "TichLuy." + moc + "ngay.Reward";
+                    String pathLore = "TichLuy." + moc + "ngay.Lore";
+                    String title = "Tích Lũy " + moc + " Ngày";
+
+                    if (event.isRightClick()) {
+                        openLoreEditor(player, pathLore, title, "TICHLUY");
+                    } else {
+                        openCommandEditor(player, pathReward, title, "TICHLUY");
+                    }
+                }
             }
             case SPECIAL -> {
                 if (slot == 53) {
@@ -326,6 +449,15 @@ public class DiemDanhEditor implements Listener {
                     else if (returnMenu.equals("TICHLUY")) openTichLuyEditor(player);
                     else if (returnMenu.equals("SPECIAL")) openSpecialDayEditor(player);
                     else openMainMenu(player);
+                } else if (slot == 50 && returnMenu.equals("DAYS") && title.startsWith("Ngày ")) {
+                    String day = title.replace("Ngày ", "");
+                    openLoreEditor(player, "Days." + day + ".Lore", title, "DAYS");
+                } else if (slot == 50 && returnMenu.equals("TICHLUY") && title.startsWith("Tích Lũy ")) {
+                    String moc = title.replace("Tích Lũy ", "").replace(" Ngày", "");
+                    openLoreEditor(player, "TichLuy." + moc + "ngay.Lore", title, "TICHLUY");
+                } else if (slot == 51 && returnMenu.equals("SPECIAL") && title.startsWith("Lễ ")) {
+                    String key = title.replace("Lễ ", "");
+                    openLoreEditor(player, "SpecialDay." + key + ".Lore", title, "SPECIAL");
                 } else if (slot == 49) {
                     player.closeInventory();
                     activeSessions.put(player.getUniqueId(), new EditSession(configPath, EditType.ADD_COMMAND, returnMenu, title));
@@ -345,6 +477,59 @@ public class DiemDanhEditor implements Listener {
                         rep.put("<command>", removed);
                         sendMessage(player, "DeleteCommandSuccess", rep);
                         openCommandEditor(player, configPath, title, returnMenu);
+                    }
+                }
+            }
+            case LORE -> {
+                String extra = holder.getExtraData();
+                String[] parts = extra.split("::");
+                String configPath = parts.length > 0 ? parts[0] : "";
+                String returnMenu = parts.length > 1 ? parts[1] : "DAYS";
+                String title = parts.length > 2 ? parts[2] : "";
+
+                if (slot == 53) {
+                    if (returnMenu.equals("DAYS")) openDaysEditor(player);
+                    else if (returnMenu.equals("TICHLUY")) openTichLuyEditor(player);
+                    else if (returnMenu.equals("SPECIAL")) openSpecialDayEditor(player);
+                    else openMainMenu(player);
+                } else if (slot == 48) {
+                    // Chuyển sang sửa Lệnh Thưởng
+                    if (returnMenu.equals("DAYS") && title.startsWith("Ngày ")) {
+                        String day = title.replace("Ngày ", "");
+                        openCommandEditor(player, "Days." + day + ".Reward", title, "DAYS");
+                    } else if (returnMenu.equals("TICHLUY") && title.startsWith("Tích Lũy ")) {
+                        String moc = title.replace("Tích Lũy ", "").replace(" Ngày", "");
+                        openCommandEditor(player, "TichLuy." + moc + "ngay.Reward", title, "TICHLUY");
+                    } else if (returnMenu.equals("SPECIAL") && title.startsWith("Lễ ")) {
+                        String key = title.replace("Lễ ", "");
+                        openCommandEditor(player, "SpecialDay." + key + ".Reward", title, "SPECIAL");
+                    }
+                } else if (slot == 49) {
+                    // Thêm dòng Lore mới
+                    player.closeInventory();
+                    activeSessions.put(player.getUniqueId(), new EditSession(configPath, EditType.ADD_LORE_LINE, returnMenu, title));
+                    sendMessage(player, "AddLorePrompt", null);
+                } else if (slot < 45) {
+                    List<String> lores = getLoreFromConfig(configPath);
+                    if (slot < lores.size()) {
+                        if (event.isRightClick()) {
+                            // Click Phải: XÓA dòng này
+                            String removed = lores.remove(slot);
+                            saveLoreToConfig(configPath, lores);
+                            Map<String, String> rep = new HashMap<>();
+                            rep.put("<lore>", removed);
+                            sendMessage(player, "DeleteLoreSuccess", rep);
+                            openLoreEditor(player, configPath, title, returnMenu);
+                        } else {
+                            // Click Trái: SỬA dòng này
+                            String currentLine = lores.get(slot);
+                            player.closeInventory();
+                            activeSessions.put(player.getUniqueId(), new EditSession(configPath, EditType.EDIT_LORE_LINE, returnMenu, title, slot, currentLine));
+                            Map<String, String> rep = new HashMap<>();
+                            rep.put("<index>", String.valueOf(slot + 1));
+                            rep.put("<old_lore>", currentLine);
+                            sendMessage(player, "EditLorePrompt", rep);
+                        }
                     }
                 }
             }
@@ -377,19 +562,38 @@ public class DiemDanhEditor implements Listener {
                 Map<String, String> rep = new HashMap<>();
                 rep.put("<command>", msg);
                 sendMessage(player, "AddCommandSuccess", rep);
-                reopenMenu(player, session);
+                openCommandEditor(player, session.configPath, session.title, session.returnMenu);
+            } else if (session.editType == EditType.ADD_LORE_LINE) {
+                List<String> lores = getLoreFromConfig(session.configPath);
+                lores.add(msg);
+                saveLoreToConfig(session.configPath, lores);
+                Map<String, String> rep = new HashMap<>();
+                rep.put("<lore>", msg);
+                sendMessage(player, "AddLoreSuccess", rep);
+                openLoreEditor(player, session.configPath, session.title, session.returnMenu);
+            } else if (session.editType == EditType.EDIT_LORE_LINE) {
+                List<String> lores = getLoreFromConfig(session.configPath);
+                if (session.lineIndex >= 0 && session.lineIndex < lores.size()) {
+                    lores.set(session.lineIndex, msg);
+                    saveLoreToConfig(session.configPath, lores);
+                    Map<String, String> rep = new HashMap<>();
+                    rep.put("<index>", String.valueOf(session.lineIndex + 1));
+                    rep.put("<lore>", msg);
+                    sendMessage(player, "EditLoreSuccess", rep);
+                }
+                openLoreEditor(player, session.configPath, session.title, session.returnMenu);
             } else if (session.editType == EditType.CHANGE_DISPLAY_NAME) {
                 plugin.getConfig().set(session.configPath, msg);
                 plugin.saveConfig();
                 Map<String, String> rep = new HashMap<>();
                 rep.put("<name>", msg);
                 sendMessage(player, "ChangeNameSuccess", rep);
-                reopenMenu(player, session);
+                openCommandEditor(player, session.configPath, session.title, session.returnMenu);
             } else if (session.editType == EditType.CREATE_SPECIAL_DAY) {
                 String[] args = msg.split(" ");
                 if (args.length < 3) {
                     sendMessage(player, "CreateSpecialSyntaxError", null);
-                    reopenMenu(player, session);
+                    openSpecialDayEditor(player);
                     return;
                 }
                 try {
@@ -413,7 +617,7 @@ public class DiemDanhEditor implements Listener {
                 } catch (NumberFormatException e) {
                     sendMessage(player, "CreateSpecialNumberError", null);
                 }
-                reopenMenu(player, session);
+                openSpecialDayEditor(player);
             }
         });
     }
@@ -424,7 +628,9 @@ public class DiemDanhEditor implements Listener {
     }
 
     private void reopenMenu(Player player, EditSession session) {
-        if (session.editType == EditType.CREATE_SPECIAL_DAY) {
+        if (session.editType == EditType.ADD_LORE_LINE || session.editType == EditType.EDIT_LORE_LINE) {
+            openLoreEditor(player, session.configPath, session.title, session.returnMenu);
+        } else if (session.editType == EditType.CREATE_SPECIAL_DAY) {
             openSpecialDayEditor(player);
         } else if (session.returnMenu.equals("SPECIAL")) {
             if (session.configPath != null && session.configPath.startsWith("SpecialDay.")) {
