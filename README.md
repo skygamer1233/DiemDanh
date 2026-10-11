@@ -142,6 +142,6 @@ File JAR hoàn chỉnh sẽ nằm trong thư mục `target/diemdanh-1.6-BETA.jar
 
 ## 👨‍💻 Tác Giả & Bản Quyền
 
-- **Phát triển bởi:** [SkyGamer](https://github.com/SkyGamer)
+- **Phát triển bởi:** [SkyGamer](https://github.com/skygamer1233)
 - **Phiên bản:** `1.6-BETA`
 - Nếu bạn thấy plugin hữu ích, hãy để lại một ⭐ trên repository để ủng hộ tác giả nhé!
