@@ -23,3 +23,4 @@ Message:
   GiveTicketUsage: "&a/diemdanh giveticket <playername> <amount> : Gửi Phiếu Điểm Danh Bù Cho Player"
   ReloadUsage: "&a/diemdanh reload : Reload plugin"
   TopUsage: "&a/diemdanh top : Mở Bảng Top Điểm Danh"
+  ChestUsage: "&a/diemdanh chest : Mở Bảng Điểm Danh Rương (Java UI)"

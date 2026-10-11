@@ -22,3 +22,4 @@ Message:
   GiveTicketUsage: "&a/diemdanh giveticket <playername> <amount> : Give re-sign in ticket to a player"
   ReloadUsage: "&a/diemdanh reload : Reload plugin"
   TopUsage: "&a/diemdanh top : Open Sign-in LeaderBoard GUI"
+  ChestUsage: "&a/diemdanh chest : Open Chest Sign-in GUI (Java UI)"
