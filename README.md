@@ -1,20 +1,28 @@
 # 📅 DiemDanh Reloaded
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-1.5--BETA-brightgreen.svg" alt="Version">
+  <img src="https://img.shields.io/badge/Version-1.6--BETA-brightgreen.svg" alt="Version">
   <img src="https://img.shields.io/badge/Java-21-orange.svg" alt="Java 21">
   <img src="https://img.shields.io/badge/Minecraft-1.13_to_1.21.x-blue.svg" alt="Minecraft">
   <img src="https://img.shields.io/badge/Platform-Paper%20%7C%20Spigot%20%7C%20Purpur-lightgrey.svg" alt="Platform">
+  <img src="https://img.shields.io/badge/Bedrock-Geyser%20%2F%20Floodgate-cyan.svg" alt="Bedrock Floodgate">
   <img src="https://img.shields.io/badge/Author-SkyGamer-purple.svg" alt="Author">
 </p>
 
-**DiemDanh Reloaded** là một plugin điểm danh hàng ngày chuyên nghiệp, tối ưu và toàn diện dành cho máy chủ Minecraft (Spigot / Paper / Purpur từ phiên bản 1.13 đến 1.21+). Plugin cung cấp giao diện GUI dạng lịch tháng trực quan, hệ thống phần thưởng tích lũy, điểm danh bù, sự kiện ngày lễ đặc biệt, bảng xếp hạng Top và trình biên tập GUI Editor in-game tiện lợi.
+**DiemDanh Reloaded** là một plugin điểm danh hàng ngày chuyên nghiệp, tối ưu và toàn diện dành cho máy chủ Minecraft (Spigot / Paper / Purpur từ phiên bản 1.13 đến 1.21+). Plugin hỗ trợ cả người chơi Java Edition và **người chơi Bedrock Edition** (qua Geyser/Floodgate) với giao diện Form UI gốc siêu mượt, hệ thống phần thưởng tích lũy, điểm danh bù, sự kiện ngày lễ đặc biệt, bảng xếp hạng Top và trình biên tập GUI Editor in-game tiện lợi.
 
 ---
 
 ## ✨ Tính Năng Nổi Bật
 
-- 📆 **Giao diện Lịch Điểm Danh Động:**
+- 📱 **Hỗ Trợ Native GUI Cho Bedrock Edition (Geyser & Floodgate):**
+  - **Tự động nhận diện:** Khi người chơi từ điện thoại, máy tính bảng hoặc console đăng nhập qua Geyser/Floodgate, lệnh `/diemdanh` sẽ tự động hiển thị giao diện Bedrock SimpleForm gốc.
+  - **Thân thiện với màn hình cảm ứng:** Không còn cảm giác khó bấm hay trễ như khi thao tác trên rương Java. Các nút bấm lớn, bố cục rõ ràng: *Điểm danh hôm nay, Điểm danh bù, Quà mốc tích lũy, Bảng xếp hạng, Xem lịch tháng*.
+  - **Tùy biến hoàn toàn qua `diemdanhform.yml`:** Toàn bộ tiêu đề menu, nội dung hiển thị, định dạng trạng thái và văn bản trên từng nút bấm được cấu hình độc lập qua file `diemdanhform.yml` (kèm bản mẫu `diemdanhform_en.yml`). Hỗ trợ reload nóng qua `/diemdanh reload`.
+  - **Tùy chọn linh hoạt:** Người chơi Bedrock vẫn có thể gõ `/diemdanh chest` để chuyển sang giao diện rương truyền thống bất cứ lúc nào.
+  - **Ổn định & Không drop TPS (Zero Lag):** Mọi tác vụ được xử lý luồng an toàn (an toàn giữa network thread của Floodgate và Bukkit main thread), có bộ lọc click cooldown chống spam, đảm bảo server luôn giữ vững 20.0 TPS.
+  - **Soft-dependency An Toàn:** Nếu máy chủ không cài Floodgate, plugin vẫn hoạt động bình thường 100% không gặp lỗi hay crash.
+- 📆 **Giao diện Lịch Điểm Danh Động (Java Edition):**
   - Tự động nhận diện số ngày thực tế của tháng (28, 29, 30 hoặc 31 ngày) bằng `YearMonth`.
   - Phân loại trạng thái ngày trực quan: *Chưa tới ngày, Hôm nay có thể điểm danh, Đã điểm danh, Bỏ lỡ, Điểm danh bù*.
 - 🎁 **Mốc Quà Tích Lũy (Streak Milestones):**
@@ -22,12 +30,12 @@
 - 🎫 **Phiếu Điểm Danh Bù (Compensation Tickets):**
   - Cho phép người chơi sử dụng vé điểm danh bù để gỡ lại những ngày đã lỡ trong tháng.
 - 🎉 **Sự Kiện Ngày Lễ Đặc Biệt (SpecialDay):**
-  - Tùy biến phần thưởng và icon riêng biệt cho các ngày lễ cố định (như 1/6, 2/9,...).
+  - Tùy biến phần thưởng và icon riêng biệt cho các ngày lễ cố định (như 1/6, 2/9, 25/12,...).
 - 🏆 **Bảng Xếp Hạng Top 10 Siêu Mượt (Leaderboard GUI):**
   - Xem Top 10 Tháng và Top 10 Tổng tích lũy hiển thị đầu người chơi (`PLAYER_HEAD`).
   - **Tối ưu Asynchronous:** Tự động tính toán ngầm và cache dữ liệu định kỳ mỗi 5 phút, mở GUI **0ms độ trễ**, hoàn toàn không gây khựng/drop TPS máy chủ.
-- 🛠 **Trình Biên Tập GUI In-Game (`/diemdanh editor`):**
-  - Admin có thể trực tiếp thêm/sửa/xóa lệnh thưởng hoặc tạo ngày lễ mới qua giao diện và chat mà không cần sửa file YAML thủ công.
+- 🛠 **Trình Biên Tập GUI In-Game Toàn Diện (`/diemdanh editor`):**
+  - Admin có thể trực tiếp thêm/sửa/xóa lệnh thưởng (`Reward`), **chỉnh sửa từng dòng mô tả (`Lore`) của từng ngày thường, mốc tích lũy và ngày lễ**, đổi tên ngày lễ qua giao diện và chat mà không cần sửa file YAML thủ công.
 - ⚡ **Lưu Trữ Bất Đồng Bộ Độc Lập (Async UUID Storage):**
   - Dữ liệu người chơi lưu theo từng file riêng biệt trong thư mục `playerdata/<UUID>.yml`.
   - Cơ chế lưu ngầm bất đồng bộ (Async I/O) giúp server hoạt động mượt mà ngay cả khi có hàng nghìn người chơi.
@@ -46,8 +54,9 @@
 
 | Lệnh | Mô tả | Quyền hạn | Mặc định |
 | :--- | :--- | :--- | :--- |
-| `/diemdanh` | Mở giao diện lịch điểm danh cá nhân | `diemdanh.use` | `true` (Tất cả) |
-| `/diemdanh top` | Mở bảng xếp hạng Top điểm danh | `diemdanh.top` | `true` (Tất cả) |
+| `/diemdanh` | Mở giao diện điểm danh (Tự động nhận diện Bedrock Form / Java Chest) | `diemdanh.use` | `true` (Tất cả) |
+| `/diemdanh chest` | Ép mở giao diện rương Java truyền thống (Dành cho Bedrock muốn dùng rương) | `diemdanh.use` | `true` (Tất cả) |
+| `/diemdanh top` | Mở bảng xếp hạng Top điểm danh (Tự động chuyển Form/GUI phù hợp) | `diemdanh.top` | `true` (Tất cả) |
 | `/diemdanh giveticket <player> <số_lượng>` | Tặng vé điểm danh bù cho người chơi | `diemdanh.giveticket` | `OP` |
 | `/diemdanh editor` | Mở giao diện cấu hình phần thưởng in-game | `diemdanh.editor` | `OP` |
 | `/diemdanh reload` | Nạp lại toàn bộ file cấu hình và ngôn ngữ | `diemdanh.reload` | `OP` |
@@ -86,14 +95,16 @@ Nếu máy chủ của bạn cài đặt [PlaceholderAPI](https://www.spigotmc.o
 ```
 plugins/DiemDanh/
  ├── config.yml           # Cấu hình quà từng ngày, mốc tích lũy và ngày lễ
+ ├── diemdanhform.yml     # Cấu hình giao diện Bedrock Form (Cumulus Forms)
  ├── editor.yml           # Cấu hình giao diện và tin nhắn của Menu Editor
  ├── topgui.yml           # Cấu hình giao diện bảng xếp hạng Top
  ├── language/
  │    ├── message_vi.yml  # File ngôn ngữ Tiếng Việt
  │    └── message_en.yml  # File ngôn ngữ Tiếng Anh
- └── playerdata/          # Dữ liệu điểm danh của từng người chơi lưu theo UUID
-      ├── <uuid-1>.yml
-      └── <uuid-2>.yml
+ ├── playerdata/          # Dữ liệu điểm danh của từng người chơi lưu theo UUID
+ │    ├── <uuid-1>.yml
+ │    └── <uuid-2>.yml
+ └── (English Presets)    # config_en.yml, diemdanhform_en.yml, editor_en.yml, topgui_en.yml
 ```
 
 ---
@@ -104,7 +115,8 @@ plugins/DiemDanh/
    - **Java:** Phiên bản 21 trở lên.
    - **Máy chủ:** Paper, Purpur hoặc Spigot (1.13 - 1.21.x).
    - *(Khuyến nghị)* [PlaceholderAPI](https://www.spigotmc.org/resources/placeholderapi.6245/) để hiển thị thông tin lên Scoreboard hoặc Tablist.
-2. Tải file `diemdanh-1.5-BETA.jar` từ mục **Releases** trên GitHub.
+   - *(Tùy chọn)* [Floodgate](https://geysermc.org/) nếu muốn hỗ trợ native form UI cho người chơi Bedrock Edition.
+2. Tải file `diemdanh-1.6-BETA.jar` từ mục **Releases** trên GitHub.
 3. Bỏ file `.jar` vào thư mục `plugins/` của máy chủ.
 4. Khởi động lại máy chủ (hoặc dùng PlugMan / lệnh khởi động).
 5. Tùy chỉnh quà tặng và giao diện trong thư mục `plugins/DiemDanh/` theo ý muốn!
@@ -124,12 +136,12 @@ cd DiemDanh
 mvn clean package
 ```
 
-File JAR hoàn chỉnh sẽ nằm trong thư mục `target/diemdanh-1.5-BETA.jar`.
+File JAR hoàn chỉnh sẽ nằm trong thư mục `target/diemdanh-1.6-BETA.jar`.
 
 ---
 
 ## 👨‍💻 Tác Giả & Bản Quyền
 
 - **Phát triển bởi:** [SkyGamer](https://github.com/SkyGamer)
-- **Phiên bản:** `1.5-BETA`
+- **Phiên bản:** `1.6-BETA`
 - Nếu bạn thấy plugin hữu ích, hãy để lại một ⭐ trên repository để ủng hộ tác giả nhé!
