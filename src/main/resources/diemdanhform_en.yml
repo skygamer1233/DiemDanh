@@ -1,0 +1,96 @@
+# ========================================================
+# DiemDanh Reloaded - Bedrock Form Settings (Cumulus Forms)
+# Supports GeyserMC & Floodgate for Bedrock Edition players
+# Supports standard color codes (&a, &b,...) and Hex colors (&#RRGGBB)
+# ========================================================
+
+version: 1
+
+Settings:
+  ClickCooldownMillis: 350 # Cooldown (ms) to prevent double-tap button spam on touchscreens
+
+# Main Menu opened with /diemdanh
+MainMenu:
+  Title: "&a&lDAILY CHECK-IN"
+  Content:
+    - "&7--------------------------------"
+    - "&e&lWelcome: &f%player%"
+    - "&a&lToday: &fDay %day% of Month %month%/%year%"
+    - "&b&lMonthly Check-ins: &f%month_days% days"
+    - "&6&lTotal Check-ins: &f%total_days% days"
+    - "&e&lMake-up Tickets: &f%tickets% tickets"
+    - "&d&lToday Status: %today_status%"
+    - "&7--------------------------------"
+  Status:
+    CheckedIn: "&a✔ Checked In"
+    NotCheckedIn: "&c✖ Not Checked In"
+    SpecialDaySuffix: " &6(Event: %special_day%)"
+  Buttons:
+    TodayCheckIn: "&a&l✔ Check In Today"
+    AlreadyCheckedIn: "&7&l✔ Already Checked In Today"
+    MissedDays: "&e&l✎ Make-up Missed Days (%count% days)"
+    Milestones: "&6&l🎁 Milestone Rewards"
+    Leaderboard: "&b&l🏆 Leaderboard"
+    Calendar: "&d&l📅 Calendar Details"
+    ChestGui: "&e&l📦 Open Chest GUI (Java Style)"
+    Close: "&c&l✖ Close"
+
+# Make-up missed days menu
+MissedDaysMenu:
+  Title: "&e&lMAKE-UP MISSED DAYS"
+  Header:
+    - "&7--------------------------------"
+    - "&e&lAvailable Make-up Tickets: &a%tickets% tickets"
+  NoMissedDays: "&aYou have not missed any days this month!"
+  NoTicketsWarning:
+    - "&cYou do not have enough tickets to make up for missed days!"
+    - "&7(Obtain tickets from staff or server events)"
+  HasMissedDays: "&fSelect a day below to make up (Cost: 1 ticket):"
+  Footer:
+    - "&7--------------------------------"
+  ButtonFormat: "&eDay %day% &7(Tap to make up)"
+  BackButton: "&c&l◀ Back"
+
+# Milestone Rewards Menu (7, 14, 21 days)
+MilestoneMenu:
+  Title: "&6&lMILESTONE REWARDS"
+  Content:
+    - "&7--------------------------------"
+    - "&a&lMonthly Check-in Days: &e%month_days% days"
+    - "&fReach the milestones below to claim bonus rewards!"
+    - "&7--------------------------------"
+  Buttons:
+    Claimable: "&a&l🎁 Milestone %days% Days &f[TAP TO CLAIM]"
+    Claimed: "&7&l✔ Milestone %days% Days &8[CLAIMED]"
+    Locked: "&c&l🔒 Milestone %days% Days &7[%month_days%/%days% Days]"
+    BackButton: "&c&l◀ Back"
+
+# Top 10 Leaderboard Menu
+LeaderboardMenu:
+  Title: "&b&lLEADERBOARD"
+  MonthHeader: "&e&l=== MONTHLY LEADERBOARD ===&r"
+  MonthEmpty: "&7No monthly ranking data available."
+  TotalHeader: "&6&l=== ALL-TIME LEADERBOARD ===&r"
+  TotalEmpty: "&7No all-time ranking data available."
+  EntryFormat: "%medal%&e%player%&7: &a%days% days"
+  Medals:
+    Top1: "&6#1. "
+    Top2: "&f#2. "
+    Top3: "&c#3. "
+    Default: "&7#%rank%. "
+  Buttons:
+    Refresh: "&a&l🔄 Refresh"
+    BackButton: "&c&l◀ Back"
+
+# Calendar Details Menu
+CalendarDetailMenu:
+  Title: "&d&lCALENDAR DETAILS"
+  Header: "&7Check-in details for month %month%/%year%:\n"
+  Format:
+    CheckedIn: "&fDay %day%: &a✔ Checked In"
+    Today: "&fDay %day%: &e⭐ Today (Not Checked In)"
+    Missed: "&fDay %day%: &c✖ Missed (Make-up available)"
+    Locked: "&fDay %day%: &8🔒 Future Day"
+    Default: "&fDay %day%: &7- Not Checked In"
+    SpecialDaySuffix: " &6[Event: %special_day%]"
+  BackButton: "&c&l◀ Back"

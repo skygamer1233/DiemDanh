@@ -1,7 +1,8 @@
 name: DiemDanh
-version: '1.5-BETA'
+version: '1.6-BETA'
 main: me.diemdanh.DiemDanh
 api-version: '1.13'
+softdepend: [PlaceholderAPI, floodgate]
 commands:
   diemdanh:
     description: Mở GUI điểm danh hàng ngày

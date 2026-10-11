@@ -1,0 +1,96 @@
+# ========================================================
+# DiemDanh Reloaded - Cấu hình giao diện Bedrock Form (Cumulus Forms)
+# Hỗ trợ GeyserMC & Floodgate dành cho người chơi Bedrock Edition
+# Hỗ trợ mã màu chuẩn (&a, &b,...) và mã màu Hex (&#RRGGBB)
+# ========================================================
+
+version: 1
+
+Settings:
+  ClickCooldownMillis: 350 # Cooldown (ms) chống người chơi Bedrock chạm đúp / spam nút
+
+# Menu chính khi gõ /diemdanh
+MainMenu:
+  Title: "&a&lĐIỂM DANH HÀNG NGÀY"
+  Content:
+    - "&7--------------------------------"
+    - "&e&lXin chào: &f%player%"
+    - "&a&lHôm nay: &fNgày %day% tháng %month%/%year%"
+    - "&b&lTích lũy tháng: &f%month_days% ngày"
+    - "&6&lTổng điểm danh: &f%total_days% ngày"
+    - "&e&lVé điểm danh bù: &f%tickets% vé"
+    - "&d&lTrạng thái hôm nay: %today_status%"
+    - "&7--------------------------------"
+  Status:
+    CheckedIn: "&a✔ Đã điểm danh"
+    NotCheckedIn: "&c✖ Chưa điểm danh"
+    SpecialDaySuffix: " &6(Sự kiện: %special_day%)"
+  Buttons:
+    TodayCheckIn: "&a&l✔ Điểm Danh Hôm Nay"
+    AlreadyCheckedIn: "&7&l✔ Đã Điểm Danh Hôm Nay"
+    MissedDays: "&e&l✎ Điểm Danh Bù (%count% ngày)"
+    Milestones: "&6&l🎁 Quà Mốc Tích Lũy"
+    Leaderboard: "&b&l🏆 Bảng Xếp Hạng"
+    Calendar: "&d&l📅 Chi Tiết Lịch Tháng"
+    ChestGui: "&e&l📦 Mở Giao Diện Rương (Java)"
+    Close: "&c&l✖ Đóng"
+
+# Menu Điểm danh bù (Bù các ngày đã lỡ trong tháng)
+MissedDaysMenu:
+  Title: "&e&lĐIỂM DANH BÙ"
+  Header:
+    - "&7--------------------------------"
+    - "&e&lVé điểm danh bù hiện có: &a%tickets% vé"
+  NoMissedDays: "&aBạn không có ngày nào bị bỏ lỡ trong tháng này!"
+  NoTicketsWarning:
+    - "&cBạn không có đủ vé điểm danh bù để bù ngày!"
+    - "&7(Nhận vé từ quản trị viên hoặc sự kiện)"
+  HasMissedDays: "&fChọn một ngày bên dưới để tiến hành điểm danh bù (Tốn 1 vé):"
+  Footer:
+    - "&7--------------------------------"
+  ButtonFormat: "&eNgày %day% &7(Bấm để bù)"
+  BackButton: "&c&l◀ Quay Lại"
+
+# Menu Mốc quà tích luỹ (7, 14, 21 ngày)
+MilestoneMenu:
+  Title: "&6&lQUÀ MỐC TÍCH LŨY"
+  Content:
+    - "&7--------------------------------"
+    - "&a&lSố ngày tích lũy tháng này: &e%month_days% ngày"
+    - "&fĐạt các mốc tích lũy bên dưới để nhận phần thưởng đặc biệt!"
+    - "&7--------------------------------"
+  Buttons:
+    Claimable: "&a&l🎁 Mốc %days% Ngày &f[BẤM ĐỂ NHẬN]"
+    Claimed: "&7&l✔ Mốc %days% Ngày &8[ĐÃ NHẬN]"
+    Locked: "&c&l🔒 Mốc %days% Ngày &7[%month_days%/%days% Ngày]"
+    BackButton: "&c&l◀ Quay Lại"
+
+# Menu Bảng xếp hạng Top 10
+LeaderboardMenu:
+  Title: "&b&lBẢNG XẾP HẠNG"
+  MonthHeader: "&e&l=== BẢNG XẾP HẠNG THÁNG ===&r"
+  MonthEmpty: "&7Chưa có dữ liệu xếp hạng tháng."
+  TotalHeader: "&6&l=== BẢNG XẾP HẠNG TỔNG ===&r"
+  TotalEmpty: "&7Chưa có dữ liệu xếp hạng tổng."
+  EntryFormat: "%medal%&e%player%&7: &a%days% ngày"
+  Medals:
+    Top1: "&6#1. "
+    Top2: "&f#2. "
+    Top3: "&c#3. "
+    Default: "&7#%rank%. "
+  Buttons:
+    Refresh: "&a&l🔄 Làm Mới"
+    BackButton: "&c&l◀ Quay Lại"
+
+# Menu Xem chi tiết lịch cả tháng
+CalendarDetailMenu:
+  Title: "&d&lCHI TIẾT LỊCH THÁNG"
+  Header: "&7Chi tiết lịch điểm danh tháng %month%/%year%:\n"
+  Format:
+    CheckedIn: "&fNgày %day%: &a✔ Đã điểm danh"
+    Today: "&fNgày %day%: &e⭐ Hôm nay (Chưa điểm danh)"
+    Missed: "&fNgày %day%: &c✖ Bỏ lỡ (Có thể điểm danh bù)"
+    Locked: "&fNgày %day%: &8🔒 Chưa tới ngày"
+    Default: "&fNgày %day%: &7- Chưa điểm danh"
+    SpecialDaySuffix: " &6[Sự kiện: %special_day%]"
+  BackButton: "&c&l◀ Quay Lại"

@@ -445,3 +445,7 @@ SpecialDay:
     Reward:
       - give <player> netherite_ingot 2
       - eco give <player> 20000
+
+# Bedrock Form Settings (Cumulus Forms for Geyser / Floodgate)
+# All texts, titles, buttons, and layouts are fully customizable in: diemdanhform.yml
+

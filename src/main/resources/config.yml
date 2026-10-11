@@ -446,3 +446,7 @@ SpecialDay:
     Reward:
       - give <player> grass 1
 
+# Cấu hình giao diện Bedrock Form (Cumulus Forms cho Geyser / Floodgate)
+# Toàn bộ nội dung, tiêu đề và các nút bấm được tùy chỉnh riêng biệt tại: diemdanhform.yml
+
+
