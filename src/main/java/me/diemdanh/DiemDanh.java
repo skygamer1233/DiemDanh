@@ -1,5 +1,8 @@
 package me.diemdanh;
 
+import me.diemdanh.bedrock.BedrockService;
+import me.diemdanh.bedrock.DummyBedrockService;
+import me.diemdanh.bedrock.FloodgateBedrockService;
 import me.diemdanh.data.PlayerDataManager;
 import me.diemdanh.hook.DiemDanhExpansion;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -27,6 +30,7 @@ import java.util.logging.Level;
 public class DiemDanh extends JavaPlugin implements Listener {
 
     private PlayerDataManager playerDataManager;
+    private BedrockService bedrockService;
     public FileConfiguration playerData; // Backward-compatibility
     public File playerDataFile;
     public DiemDanhTop diemDanhTop;
@@ -41,6 +45,9 @@ public class DiemDanh extends JavaPlugin implements Listener {
 
     public File editorFile;
     public FileConfiguration editorConfig;
+
+    public File bedrockFormFile;
+    public FileConfiguration bedrockFormConfig;
 
     private Map<String, FileConfiguration> languageConfigs;
 
@@ -57,6 +64,7 @@ public class DiemDanh extends JavaPlugin implements Listener {
 
         loadLanguageFiles();
         createEditorConfig();
+        createBedrockFormConfig();
 
         // 2. Load topgui.yml
         updateConfigFile("topgui.yml");
@@ -88,10 +96,27 @@ public class DiemDanh extends JavaPlugin implements Listener {
             getLogger().info("Hook vao PlaceholderAPI thanh cong!");
         }
 
+        // 5. Hook Floodgate (Bedrock GUI) neu co
+        if (getServer().getPluginManager().isPluginEnabled("floodgate")) {
+            try {
+                bedrockService = new FloodgateBedrockService(this);
+                getLogger().info("Hook vao Floodgate (Bedrock Form GUI) thanh cong!");
+            } catch (Throwable t) {
+                bedrockService = new DummyBedrockService(this);
+                getLogger().warning("Khong the khoi tao Floodgate Bedrock GUI: " + t.getMessage());
+            }
+        } else {
+            bedrockService = new DummyBedrockService(this);
+        }
+
         getLogger().info(ColorUtil.translate("&7--------------------------------------"));
-        getLogger().info(ColorUtil.translate("&eDiemDanh Reloaded &a(v1.5-BETA) enabled"));
+        getLogger().info(ColorUtil.translate("&eDiemDanh Reloaded &a(v1.6-BETA) enabled"));
         getLogger().info(ColorUtil.translate("&8Plugin by SkyGamer"));
         getLogger().info(ColorUtil.translate("&7--------------------------------------"));
+    }
+
+    public BedrockService getBedrockService() {
+        return bedrockService;
     }
 
     public PlayerDataManager getPlayerDataManager() {
@@ -111,12 +136,27 @@ public class DiemDanh extends JavaPlugin implements Listener {
         return editorConfig;
     }
 
+    public void createBedrockFormConfig() {
+        updateConfigFile("diemdanhform.yml");
+        bedrockFormFile = new File(getDataFolder(), "diemdanhform.yml");
+        if (!bedrockFormFile.exists()) {
+            saveResource("diemdanhform.yml", false);
+        }
+        bedrockFormConfig = YamlConfiguration.loadConfiguration(bedrockFormFile);
+    }
+
+    public FileConfiguration getBedrockFormConfig() {
+        if (bedrockFormConfig == null) createBedrockFormConfig();
+        return bedrockFormConfig;
+    }
+
     // --- HÀM RELOAD TOÀN BỘ CẤU HÌNH PLUGIN ---
     public void reloadAllConfigs() {
         reloadConfig();
         guiTitle = ColorUtil.translate(getConfig().getString("Title", "&a&lĐiểm Danh Tháng "));
 
         createEditorConfig();
+        createBedrockFormConfig();
         if (diemDanhEditor != null) {
             diemDanhEditor.loadEditorConfig();
         }

@@ -78,22 +78,55 @@ public class DiemDanhCommand implements CommandExecutor {
         }
 
         // --- LỆNH /diemdanh top ---
-        if (args.length == 1 && args[0].equalsIgnoreCase("top")) {
+        if (args.length >= 1 && args[0].equalsIgnoreCase("top")) {
             if (player == null) {
                 sender.sendMessage(plugin.getMessage("NotPlayer"));
                 return true;
             }
-            plugin.getDiemDanhTop().openTopDiemDanhGUI(player);
+            boolean forceChest = (args.length >= 2 && args[1].equalsIgnoreCase("chest"));
+            if (!forceChest && plugin.getBedrockService() != null && plugin.getBedrockService().isBedrockPlayer(player)) {
+                plugin.getBedrockService().openLeaderboardMenu(player);
+            } else {
+                plugin.getDiemDanhTop().openTopDiemDanhGUI(player);
+            }
             return true;
         }
 
-        // --- LỆNH /diemdanh (mở GUI chính) ---
-        if (args.length == 0) {
+        // --- LỆNH /diemdanh chest / gui (ép mở giao diện rương Java) ---
+        if (args.length == 1 && (args[0].equalsIgnoreCase("chest") || args[0].equalsIgnoreCase("gui"))) {
             if (player == null) {
                 sender.sendMessage(plugin.getMessage("NotPlayer"));
                 return true;
             }
             plugin.getDiemDanhGUI().openDiemDanhGUI(player);
+            return true;
+        }
+
+        // --- LỆNH /diemdanh bedrock / form (mở form Bedrock) ---
+        if (args.length == 1 && (args[0].equalsIgnoreCase("bedrock") || args[0].equalsIgnoreCase("form"))) {
+            if (player == null) {
+                sender.sendMessage(plugin.getMessage("NotPlayer"));
+                return true;
+            }
+            if (plugin.getBedrockService() != null && plugin.getBedrockService().isBedrockPlayer(player)) {
+                plugin.getBedrockService().openMainMenu(player);
+            } else {
+                plugin.getDiemDanhGUI().openDiemDanhGUI(player);
+            }
+            return true;
+        }
+
+        // --- LỆNH /diemdanh (mở GUI chính - Tự động phát hiện Bedrock/Java) ---
+        if (args.length == 0) {
+            if (player == null) {
+                sender.sendMessage(plugin.getMessage("NotPlayer"));
+                return true;
+            }
+            if (plugin.getBedrockService() != null && plugin.getBedrockService().isBedrockPlayer(player)) {
+                plugin.getBedrockService().openMainMenu(player);
+            } else {
+                plugin.getDiemDanhGUI().openDiemDanhGUI(player);
+            }
             return true;
         }
 
@@ -121,6 +154,7 @@ public class DiemDanhCommand implements CommandExecutor {
             sender.sendMessage(plugin.getMessage("ReloadUsage"));
         }
         sender.sendMessage(plugin.getMessage("TopUsage"));
+        sender.sendMessage(plugin.getMessage("ChestUsage"));
         return true;
     }
 }

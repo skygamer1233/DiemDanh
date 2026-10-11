@@ -319,7 +319,7 @@ public class DiemDanhGUI implements Listener {
         }
     }
 
-    private String getItemKeyForDay(int day, UUID playerUUID) {
+    public String getItemKeyForDay(int day, UUID playerUUID) {
         LocalDate today = LocalDate.now();
         if (day > today.getDayOfMonth()) {
             return "NgayDiemDanh";
@@ -334,11 +334,11 @@ public class DiemDanhGUI implements Listener {
         }
     }
 
-    private boolean isToday(int day) {
+    public boolean isToday(int day) {
         return day == LocalDate.now().getDayOfMonth();
     }
 
-    private void markPlayerCheckedIn(UUID playerUUID, int day, boolean isBu) {
+    public void markPlayerCheckedIn(UUID playerUUID, int day, boolean isBu) {
         LocalDate today = LocalDate.now();
         String specialDayKey = getSpecialDayKey(today, day);
         PlayerDataManager dataMgr = plugin.getPlayerDataManager();
@@ -386,7 +386,7 @@ public class DiemDanhGUI implements Listener {
         }
     }
 
-    private String getTichLuyItemKey(UUID playerUUID, int daysRequired) {
+    public String getTichLuyItemKey(UUID playerUUID, int daysRequired) {
         int daysCheckedIn = getDaysCheckedInThisMonth(playerUUID);
         int currentMonth = LocalDate.now().getMonthValue();
         int claimedMonth = plugin.getPlayerDataManager().getTichLuyMonth(playerUUID, daysRequired);
@@ -406,7 +406,7 @@ public class DiemDanhGUI implements Listener {
         }
     }
 
-    private String getSpecialDayKey(LocalDate today, int day) {
+    public String getSpecialDayKey(LocalDate today, int day) {
         ConfigurationSection specialSec = plugin.getConfig().getConfigurationSection("SpecialDay");
         if (specialSec == null) return null;
 
@@ -425,7 +425,7 @@ public class DiemDanhGUI implements Listener {
         return null;
     }
 
-    private String getSpecialDayItemKey(UUID playerUUID, String specialDayKey) {
+    public String getSpecialDayItemKey(UUID playerUUID, String specialDayKey) {
         boolean hasCheckedIn = plugin.getPlayerDataManager().isSpecialDayChecked(playerUUID, specialDayKey);
         ConfigurationSection specialDaySection = plugin.getConfig().getConfigurationSection("SpecialDay." + specialDayKey + ".Require");
         if (specialDaySection == null) return "ChuaDiemDanh";
