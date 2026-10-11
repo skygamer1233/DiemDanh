@@ -1,0 +1,40 @@
+TopTitle: "&c&lAttendance Leaderboard - Month <month>" # GUI Title
+TotalTitle: "&c&lAll-Time Attendance Leaderboard"       # GUI Title
+version: 1
+
+# Display item for players on the leaderboard
+TopItem:
+  ID: PLAYER_HEAD
+  Data: 0
+  Name: "&aRank #<top>: &c<player_name>"
+  Lore:
+    - "&aChecked-in this month: &e<days> &adays"
+    - "&aAll-time streak: &e<totaldays> &adays"
+  Glow: true
+
+# Button to switch to All-Time Leaderboard (Slot 53)
+NextPage:
+  ID: BOOK
+  Data: 0
+  Name: "&aNext Page (All-Time Top)"
+  Lore:
+    - "&eClick to view all-time leaderboard"
+  Glow: true
+
+# Button to return to Monthly Leaderboard (Slot 45)
+BackPage:
+  ID: BOOK
+  Data: 0
+  Name: "&aPrevious Page (Monthly Top)"
+  Lore:
+    - "&eClick to return to monthly leaderboard"
+  Glow: false
+
+# Filler / Decoration item
+FillItem:
+  ID: BLACK_STAINED_GLASS_PANE
+  Data: 0
+  Name: "&f"
+  Lore:
+    - "&f"
+  Glow: true

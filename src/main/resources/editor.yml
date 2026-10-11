@@ -7,11 +7,14 @@ Title:
   DaysMenu: "&8[&cDiemDanh Editor&8] &0Ngày Thường"
   TichLuyMenu: "&8[&cDiemDanh Editor&8] &0Tích Lũy"
   SpecialDayMenu: "&8[&cDiemDanh Editor&8] &0Ngày Lễ"
-  CommandEditor: "&8[Editor] &0<title>"
+  CommandEditor: "&8[Editor Lệnh] &0<title>"
+  LoreEditor: "&8[Editor Lore] &0<title>"
 
 Icons:
   NoRewardFormat: " &c(Chưa có lệnh thưởng)"
   RewardFormat: " &e- /<command>"
+  NoLoreFormat: " &c(Chưa có dòng mô tả)"
+  LoreFormat: " &f- <lore>"
 
   MainMenu:
     Days:
@@ -19,29 +22,32 @@ Icons:
       Name: "&a&lQuà Ngày Thường (1 - 31)"
       Lore:
         - "&7Click để chỉnh sửa danh sách lệnh"
-        - "&7thưởng cho từng ngày trong tháng."
+        - "&7thưởng và lore cho từng ngày."
     TichLuy:
       ID: "NETHER_STAR"
       Name: "&e&lQuà Tích Lũy (7, 14, 21 ngày)"
       Lore:
         - "&7Click để chỉnh sửa danh sách lệnh"
-        - "&7thưởng mốc điểm danh tích lũy."
+        - "&7thưởng và lore mốc tích lũy."
     SpecialDay:
       ID: "DRAGON_EGG"
       Name: "&c&lQuản Lý Ngày Lễ (SpecialDay)"
       Lore:
         - "&7Click để thêm, xóa ngày lễ"
-        - "&7hoặc chỉnh sửa quà ngày lễ."
+        - "&7sửa lệnh thưởng, tên và lore."
 
   DaysMenu:
     DayItem:
       ID: "PAPER"
       Name: "&eNgày <day>"
       Lore:
-        - "&7Danh sách lệnh thưởng hiện tại:"
+        - "&7Danh sách lệnh thưởng:"
         - "<rewards>"
+        - "&7Danh sách dòng Lore:"
+        - "<lores>"
         - ""
-        - "&aClick để chỉnh sửa lệnh!"
+        - "&a[Click Trái] &7Sửa lệnh thưởng"
+        - "&e[Click Phải] &7Sửa các dòng Lore"
     Back:
       ID: "BARRIER"
       Name: "&cQuay Lại Menu Chính"
@@ -53,8 +59,11 @@ Icons:
       Lore:
         - "&7Lệnh thưởng mốc &e<moc> ngày&7:"
         - "<rewards>"
+        - "&7Dòng mô tả (Lore) mốc &e<moc> ngày&7:"
+        - "<lores>"
         - ""
-        - "&aClick để chỉnh sửa!"
+        - "&a[Click Trái] &7Sửa lệnh thưởng"
+        - "&e[Click Phải] &7Sửa các dòng Lore"
     Back:
       ID: "BARRIER"
       Name: "&cQuay Lại Menu Chính"
@@ -68,8 +77,10 @@ Icons:
         - "&7Thời gian: &eNgày <date> Tháng <month>"
         - "&7Lệnh thưởng:"
         - "<rewards>"
+        - "&7Dòng mô tả (Lore):"
+        - "<lores>"
         - ""
-        - "&a[Click Trái] &7Sửa lệnh thưởng & Tên hiển thị"
+        - "&a[Click Trái] &7Sửa Lệnh & Tên & Lore"
         - "&c[Click Phải] &7Xóa ngày lễ này"
     CreateNew:
       ID: "EMERALD_BLOCK"
@@ -93,6 +104,12 @@ Icons:
       Name: "&a+ Thêm Lệnh Mới"
       Lore:
         - "&7Click để nhập lệnh thưởng mới vào Chat"
+    SwitchLore:
+      ID: "WRITABLE_BOOK"
+      Name: "&eChuyển Sang Sửa Lore"
+      Lore:
+        - "&7Click để chuyển sang chỉnh sửa"
+        - "&7từng dòng mô tả (Lore) mục này."
     ChangeNameTag:
       ID: "NAME_TAG"
       Name: "&eĐổi Tên Hiển Thị (Name)"
@@ -100,6 +117,33 @@ Icons:
         - "&7Tên hiện tại: <display_name>"
         - ""
         - "&aClick để nhập Tên hiển thị mới vào Chat!"
+    Back:
+      ID: "BARRIER"
+      Name: "&cQuay Lại"
+      Lore:
+        - "&7Menu trước"
+
+  LoreEditor:
+    LoreItem:
+      ID: "PAPER"
+      Name: "&eDòng #<index>"
+      Lore:
+        - "&7Nội dung hiện tại:"
+        - "  <lore_line>"
+        - ""
+        - "&a[Click Trái] &7Sửa nội dung dòng này"
+        - "&c[Click Phải] &7XÓA dòng này"
+    AddLine:
+      ID: "ANVIL"
+      Name: "&a+ Thêm Dòng Lore Mới"
+      Lore:
+        - "&7Click để nhập dòng lore mới vào Chat"
+    SwitchReward:
+      ID: "CHEST"
+      Name: "&bChuyển Sang Sửa Lệnh Thưởng"
+      Lore:
+        - "&7Click để chuyển sang chỉnh sửa"
+        - "&7danh sách lệnh thưởng mục này."
     Back:
       ID: "BARRIER"
       Name: "&cQuay Lại"
@@ -114,6 +158,17 @@ Messages:
     - "&7(Gõ &ccancel &7để hủy)"
   AddCommandSuccess: "&aĐã thêm lệnh thành công: &e/<command>"
   DeleteCommandSuccess: "&cĐã xóa lệnh: &e/<command>"
+  AddLorePrompt:
+    - "&a[DiemDanh Editor] Nhập dòng lore mới vào chat (Hỗ trợ mã màu &)."
+    - "&aVí dụ: &f - 100$"
+    - "&7(Gõ &ccancel &7để hủy)"
+  AddLoreSuccess: "&aĐã thêm dòng lore mới: <lore>"
+  EditLorePrompt:
+    - "&a[DiemDanh Editor] Nhập nội dung mới cho dòng lore #<index> vào chat (Hỗ trợ mã màu &)."
+    - "&7Nội dung hiện tại: <old_lore>"
+    - "&7(Gõ &ccancel &7để hủy)"
+  EditLoreSuccess: "&aĐã cập nhật dòng lore #<index> thành: <lore>"
+  DeleteLoreSuccess: "&cĐã xóa dòng lore: <lore>"
   ChangeNamePrompt:
     - "&a[DiemDanh Editor] Nhập Tên hiển thị mới cho ngày lễ vào chat (Hỗ trợ mã màu &)."
     - "&aVí dụ: &c&lPhụ Nữ Việt Nam"

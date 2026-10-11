@@ -1,0 +1,447 @@
+Title: "&b&lAttendance Month <month>" # GUI Title
+version: 1
+language: en
+Item:
+  NgayDiemDanh:  # Icon when day has not arrived yet
+    ID: GRAY_STAINED_GLASS_PANE
+    Data: 0
+    Name: "&7&lDay <date>"
+    Glow: false
+  DiemDanh:       # Icon when day is ready to claim today
+    ID: YELLOW_STAINED_GLASS_PANE
+    Data: 0
+    Name: "&e&lDay <date> Check-in"
+    Glow: true
+  ChuaDiemDanh:   # Icon when day was missed
+    ID: WHITE_STAINED_GLASS_PANE
+    Data: 0
+    Name: "&c&lDay <date> Missed"
+    Glow: false
+  DaDiemDanh:     # Icon when day is already claimed
+    ID: LIME_STAINED_GLASS_PANE
+    Data: 0
+    Name: "&a&lDay <date> Checked In"
+    Glow: false
+  DiemDanhBu:     # Icon when day can be made up with ticket
+    ID: BROWN_STAINED_GLASS_PANE
+    Data: 0
+    Name: "&b&lDay <date> Make-up Check-in"
+    Glow: false
+  ThongTin:
+    ID: BOOK
+    Data: 0
+    Name: "&e&lAttendance Information"
+    Lore:
+      - "&aDays checked in this month: <days>"
+      - "&aTotal all-time streak: <totaldays>"
+      - "&cPlugin DiemDanh by SkyGamer"
+    Glow: true
+  Ticket:
+    ID: NAME_TAG
+    Data: 0
+    Name: "&e&lMake-up Ticket"
+    Lore:
+      - "&aMake-up tickets owned: <tickets>"
+      - "  "
+      - "&cPlugin DiemDanh by SkyGamer"
+    Glow: true
+Days:
+  1:
+    Lore:
+      - "&fRewards include:"
+      - "&f - Coal x1"
+    Reward:
+      - give <player> coal 1
+  2:
+    Lore:
+      - "&fRewards include:"
+      - "&f - Iron Ingot x1"
+    Reward:
+      - give <player> iron_ingot 1
+  3:
+    Lore:
+      - "&fRewards include:"
+      - "&f - Gold Ingot x1"
+    Reward:
+      - give <player> gold_ingot 1
+  4:
+    Lore:
+      - "&fRewards include:"
+      - "&f - Diamond x1"
+    Reward:
+      - give <player> diamond 1
+  5:
+    Lore:
+      - "&fRewards include:"
+      - "&f - Emerald x1"
+    Reward:
+      - give <player> emerald 1
+  6:
+    Lore:
+      - "&fRewards include:"
+      - "&f - $100"
+    Reward:
+      - eco give <player> 100
+  7:
+    Lore:
+      - "&fRewards include:"
+      - "&f - 1 Point"
+    Reward:
+      - points give <player> 1
+  8:
+    Lore:
+      - "&fRewards include:"
+      - "&f - $100"
+      - "&f - 1 Point"
+    Reward:
+      - eco give <player> 100
+      - points give <player> 1
+  9:
+    Lore:
+      - "&fRewards include:"
+      - "&f - Diamond Block x8"
+    Reward:
+      - give <player> diamond_block 8
+  10:
+    Lore:
+      - "&fRewards include:"
+      - "&f - Emerald Block x8"
+    Reward:
+      - give <player> emerald_block 8
+  11:
+    Lore:
+      - "&fRewards include:"
+      - "&f - Coal x1"
+    Reward:
+      - give <player> coal 1
+  12:
+    Lore:
+      - "&fRewards include:"
+      - "&f - Iron Ingot x1"
+    Reward:
+      - give <player> iron_ingot 1
+  13:
+    Lore:
+      - "&fRewards include:"
+      - "&f - Gold Ingot x1"
+    Reward:
+      - give <player> gold_ingot 1
+  14:
+    Lore:
+      - "&fRewards include:"
+      - "&f - Diamond x1"
+    Reward:
+      - give <player> diamond 1
+  15:
+    Lore:
+      - "&fRewards include:"
+      - "&f - Emerald x1"
+    Reward:
+      - give <player> emerald 1
+  16:
+    Lore:
+      - "&fRewards include:"
+      - "&f - $100"
+    Reward:
+      - eco give <player> 100
+  17:
+    Lore:
+      - "&fRewards include:"
+      - "&f - 1 Point"
+    Reward:
+      - points give <player> 1
+  18:
+    Lore:
+      - "&fRewards include:"
+      - "&f - $100"
+      - "&f - 1 Point"
+    Reward:
+      - eco give <player> 100
+      - points give <player> 1
+  19:
+    Lore:
+      - "&fRewards include:"
+      - "&f - Diamond Block x8"
+    Reward:
+      - give <player> diamond_block 8
+  20:
+    Lore:
+      - "&fRewards include:"
+      - "&f - Emerald Block x8"
+    Reward:
+      - give <player> emerald_block 8
+  21:
+    Lore:
+      - "&fRewards include:"
+      - "&f - Coal x1"
+    Reward:
+      - give <player> coal 1
+  22:
+    Lore:
+      - "&fRewards include:"
+      - "&f - Iron Ingot x1"
+    Reward:
+      - give <player> iron_ingot 1
+  23:
+    Lore:
+      - "&fRewards include:"
+      - "&f - Gold Ingot x1"
+    Reward:
+      - give <player> gold_ingot 1
+  24:
+    Lore:
+      - "&fRewards include:"
+      - "&f - Diamond x1"
+    Reward:
+      - give <player> diamond 1
+  25:
+    Lore:
+      - "&fRewards include:"
+      - "&f - Emerald x1"
+    Reward:
+      - give <player> emerald 1
+  26:
+    Lore:
+      - "&fRewards include:"
+      - "&f - $100"
+    Reward:
+      - eco give <player> 100
+  27:
+    Lore:
+      - "&fRewards include:"
+      - "&f - 1 Point"
+    Reward:
+      - points give <player> 1
+  28:
+    Lore:
+      - "&fRewards include:"
+      - "&f - $100"
+      - "&f - 1 Point"
+    Reward:
+      - eco give <player> 100
+      - points give <player> 1
+  29:
+    Lore:
+      - "&fRewards include:"
+      - "&f - Diamond Block x8"
+    Reward:
+      - give <player> diamond_block 8
+  30:
+    Lore:
+      - "&fRewards include:"
+      - "&f - Emerald Block x8"
+    Reward:
+      - give <player> emerald_block 8
+  31:
+    Lore:
+      - "&fRewards include:"
+      - "&f - Netherite Ingot x1"
+    Reward:
+      - give <player> netherite_ingot 1
+TichLuy:
+  7ngay:
+    Icon:
+      ChuaNhanQua:
+        ID: CHEST_MINECART
+        Data: 0
+        Name: "&7&l7-Day Milestone"
+        Lore:
+          - "&fRewards include:"
+          - "&f - $2000"
+          - "&f - 20 Points"
+        Glow: false
+      NhanQua:
+        ID: CHEST_MINECART
+        Data: 0
+        Name: "&e&l7-Day Milestone"
+        Lore:
+          - "&fRewards include:"
+          - "&f - $2000"
+          - "&f - 20 Points"
+        Glow: true
+      DaNhanQua:
+        ID: MINECART
+        Data: 0
+        Name: "&a&l7-Day Milestone"
+        Lore:
+          - "&fRewards include:"
+          - "&f - $2000"
+          - "&f - 20 Points"
+        Glow: false
+    Require: 7
+    Reward:
+      - eco give <player> 2000
+      - points give <player> 20
+  14ngay:
+    Icon:
+      ChuaNhanQua:
+        ID: CHEST_MINECART
+        Data: 0
+        Name: "&7&l14-Day Milestone"
+        Lore:
+          - "&fRewards include:"
+          - "&f - $5000"
+          - "&f - 50 Points"
+        Glow: false
+      NhanQua:
+        ID: CHEST_MINECART
+        Data: 0
+        Name: "&e&l14-Day Milestone"
+        Lore:
+          - "&fRewards include:"
+          - "&f - $5000"
+          - "&f - 50 Points"
+        Glow: true
+      DaNhanQua:
+        ID: MINECART
+        Data: 0
+        Name: "&a&l14-Day Milestone"
+        Lore:
+          - "&fRewards include:"
+          - "&f - $5000"
+          - "&f - 50 Points"
+        Glow: false
+    Require: 14
+    Reward:
+      - eco give <player> 5000
+      - points give <player> 50
+  21ngay:
+    Icon:
+      ChuaNhanQua:
+        ID: CHEST_MINECART
+        Data: 0
+        Name: "&7&l21-Day Milestone"
+        Lore:
+          - "&fRewards include:"
+          - "&f - $10000"
+          - "&f - 100 Points"
+        Glow: false
+      NhanQua:
+        ID: CHEST_MINECART
+        Data: 0
+        Name: "&e&l21-Day Milestone"
+        Lore:
+          - "&fRewards include:"
+          - "&f - $10000"
+          - "&f - 100 Points"
+        Glow: true
+      DaNhanQua:
+        ID: MINECART
+        Data: 0
+        Name: "&a&l21-Day Milestone"
+        Lore:
+          - "&fRewards include:"
+          - "&f - $10000"
+          - "&f - 100 Points"
+        Glow: false
+    Require: 21
+    Reward:
+      - eco give <player> 10000
+      - points give <player> 100
+SpecialDay:
+  newyear:
+    Icon:
+      NgayDiemDanh:
+        ID: MAGMA_CREAM
+        Data: 0
+        Name: "&7&lNew Year Celebration"
+        Lore:
+          - "&fComing up soon!"
+          - "&fRewards include:"
+          - "&f - Diamond Block x5"
+        Glow: false
+      DiemDanh:
+        ID: MAGMA_CREAM
+        Data: 0
+        Name: "&e&lNew Year Day Check-in"
+        Lore:
+          - "&fHappy New Year!"
+          - "&fRewards include:"
+          - "&f - Diamond Block x5"
+        Glow: true
+      ChuaDiemDanh:
+        ID: COAL
+        Data: 0
+        Name: "&c&lNew Year Missed"
+        Lore:
+          - "&fYou missed New Year's day check-in."
+          - "&fRewards include:"
+          - "&f - Diamond Block x5"
+        Glow: false
+      DaDiemDanh:
+        ID: MAGMA_CREAM
+        Data: 0
+        Name: "&a&lNew Year Checked-in"
+        Lore:
+          - "&fYou claimed the New Year reward!"
+          - "&fRewards include:"
+          - "&f - Diamond Block x5"
+        Glow: false
+      DiemDanhBu:
+        ID: COAL_BLOCK
+        Data: 0
+        Name: "&b&lNew Year Make-up Check-in"
+        Lore:
+          - "&fMake up for New Year's day!"
+          - "&fRewards include:"
+          - "&f - Diamond Block x5"
+        Glow: false
+    Require:
+      Date: 1
+      Month: 1
+    Reward:
+      - give <player> diamond_block 5
+      - eco give <player> 10000
+  christmas:
+    Icon:
+      NgayDiemDanh:
+        ID: MAGMA_CREAM
+        Data: 0
+        Name: "&7&lChristmas Day"
+        Lore:
+          - "&fChristmas is coming soon!"
+          - "&fRewards include:"
+          - "&f - Netherite Ingot x2"
+        Glow: false
+      DiemDanh:
+        ID: MAGMA_CREAM
+        Data: 0
+        Name: "&e&lChristmas Day Check-in"
+        Lore:
+          - "&fMerry Christmas!"
+          - "&fRewards include:"
+          - "&f - Netherite Ingot x2"
+        Glow: true
+      ChuaDiemDanh:
+        ID: MAGMA_CREAM
+        Data: 0
+        Name: "&c&lChristmas Missed"
+        Lore:
+          - "&fYou missed Christmas check-in."
+          - "&fRewards include:"
+          - "&f - Netherite Ingot x2"
+        Glow: false
+      DaDiemDanh:
+        ID: MAGMA_CREAM
+        Data: 0
+        Name: "&a&lChristmas Checked-in"
+        Lore:
+          - "&fYou claimed Christmas rewards!"
+          - "&fRewards include:"
+          - "&f - Netherite Ingot x2"
+        Glow: false
+      DiemDanhBu:
+        ID: COAL_BLOCK
+        Data: 0
+        Name: "&b&lChristmas Make-up Check-in"
+        Lore:
+          - "&fMake up for Christmas day!"
+          - "&fRewards include:"
+          - "&f - Netherite Ingot x2"
+        Glow: false
+    Require:
+      Date: 25
+      Month: 12
+    Reward:
+      - give <player> netherite_ingot 2
+      - eco give <player> 20000

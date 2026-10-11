@@ -1,0 +1,184 @@
+# ==========================================
+# EDITOR INTERFACE & MESSAGES CONFIGURATION
+# ==========================================
+
+Title:
+  MainMenu: "&8[&cDiemDanh Editor&8] &0Main Menu"
+  DaysMenu: "&8[&cDiemDanh Editor&8] &0Daily Rewards"
+  TichLuyMenu: "&8[&cDiemDanh Editor&8] &0Milestones"
+  SpecialDayMenu: "&8[&cDiemDanh Editor&8] &0Special Days"
+  CommandEditor: "&8[Command Editor] &0<title>"
+  LoreEditor: "&8[Lore Editor] &0<title>"
+
+Icons:
+  NoRewardFormat: " &c(No reward commands set)"
+  RewardFormat: " &e- /<command>"
+  NoLoreFormat: " &c(No lore lines set)"
+  LoreFormat: " &f- <lore>"
+
+  MainMenu:
+    Days:
+      ID: "CHEST"
+      Name: "&a&lDaily Rewards (1 - 31)"
+      Lore:
+        - "&7Click to edit reward commands"
+        - "&7and lore lines for each day."
+    TichLuy:
+      ID: "NETHER_STAR"
+      Name: "&e&lMilestones (7, 14, 21 Days)"
+      Lore:
+        - "&7Click to edit reward commands"
+        - "&7and lore for cumulative milestones."
+    SpecialDay:
+      ID: "DRAGON_EGG"
+      Name: "&c&lSpecial Days Manager"
+      Lore:
+        - "&7Click to add/remove special days,"
+        - "&7edit rewards, names, and lore."
+
+  DaysMenu:
+    DayItem:
+      ID: "PAPER"
+      Name: "&eDay <day>"
+      Lore:
+        - "&7Reward commands list:"
+        - "<rewards>"
+        - "&7Lore lines list:"
+        - "<lores>"
+        - ""
+        - "&a[Left-Click] &7Edit reward commands"
+        - "&e[Right-Click] &7Edit lore lines"
+    Back:
+      ID: "BARRIER"
+      Name: "&cBack to Main Menu"
+
+  TichLuyMenu:
+    Item:
+      ID: "BEACON"
+      Name: "&b<moc>-Day Milestone"
+      Lore:
+        - "&7Reward commands for &e<moc> days&7:"
+        - "<rewards>"
+        - "&7Lore lines for &e<moc> days&7:"
+        - "<lores>"
+        - ""
+        - "&a[Left-Click] &7Edit reward commands"
+        - "&e[Right-Click] &7Edit lore lines"
+    Back:
+      ID: "BARRIER"
+      Name: "&cBack to Main Menu"
+
+  SpecialDayMenu:
+    SpecialItem:
+      ID: "SUNFLOWER"
+      Name: "&6Key: &e<key>"
+      Lore:
+        - "&7Display Name: <display_name>"
+        - "&7Date: &eMonth <month>, Day <date>"
+        - "&7Reward commands:"
+        - "<rewards>"
+        - "&7Lore lines:"
+        - "<lores>"
+        - ""
+        - "&a[Left-Click] &7Edit Commands, Name & Lore"
+        - "&c[Right-Click] &7Delete this special day"
+    CreateNew:
+      ID: "EMERALD_BLOCK"
+      Name: "&a+ Create New Special Day"
+      Lore:
+        - "&7Click to create via chat prompt"
+    Back:
+      ID: "BARRIER"
+      Name: "&cBack to Main Menu"
+
+  CommandEditor:
+    CmdItem:
+      ID: "WRITTEN_BOOK"
+      Name: "&eCommand #<index>"
+      Lore:
+        - "&f/<command>"
+        - ""
+        - "&cClick to DELETE this command!"
+    AddCmd:
+      ID: "ANVIL"
+      Name: "&a+ Add New Command"
+      Lore:
+        - "&7Click to enter a new command in Chat"
+    SwitchLore:
+      ID: "WRITABLE_BOOK"
+      Name: "&eSwitch to Lore Editor"
+      Lore:
+        - "&7Click to switch to editing"
+        - "&7individual lore lines for this item."
+    ChangeNameTag:
+      ID: "NAME_TAG"
+      Name: "&eChange Display Name"
+      Lore:
+        - "&7Current Name: <display_name>"
+        - ""
+        - "&aClick to enter a new display name in Chat!"
+    Back:
+      ID: "BARRIER"
+      Name: "&cBack"
+      Lore:
+        - "&7Previous menu"
+
+  LoreEditor:
+    LoreItem:
+      ID: "PAPER"
+      Name: "&eLine #<index>"
+      Lore:
+        - "&7Current content:"
+        - "  <lore_line>"
+        - ""
+        - "&a[Left-Click] &7Edit this line"
+        - "&c[Right-Click] &7DELETE this line"
+    AddLine:
+      ID: "ANVIL"
+      Name: "&a+ Add New Lore Line"
+      Lore:
+        - "&7Click to enter a new lore line in Chat"
+    SwitchReward:
+      ID: "CHEST"
+      Name: "&bSwitch to Reward Editor"
+      Lore:
+        - "&7Click to switch to editing"
+        - "&7reward commands for this item."
+    Back:
+      ID: "BARRIER"
+      Name: "&cBack"
+      Lore:
+        - "&7Previous menu"
+
+Messages:
+  Cancel: "&cEditing action cancelled."
+  AddCommandPrompt:
+    - "&a[DiemDanh Editor] Enter the new reward command in chat (Without leading /)."
+    - "&aExample: &egive <player> diamond 5"
+    - "&7(Type &ccancel &7to cancel)"
+  AddCommandSuccess: "&aSuccessfully added command: &e/<command>"
+  DeleteCommandSuccess: "&cDeleted command: &e/<command>"
+  AddLorePrompt:
+    - "&a[DiemDanh Editor] Enter the new lore line in chat (Color codes & supported)."
+    - "&aExample: &f - 100$"
+    - "&7(Type &ccancel &7to cancel)"
+  AddLoreSuccess: "&aSuccessfully added lore line: <lore>"
+  EditLorePrompt:
+    - "&a[DiemDanh Editor] Enter new content for lore line #<index> in chat (Color codes & supported)."
+    - "&7Current content: <old_lore>"
+    - "&7(Type &ccancel &7to cancel)"
+  EditLoreSuccess: "&aSuccessfully updated lore line #<index> to: <lore>"
+  DeleteLoreSuccess: "&cDeleted lore line: <lore>"
+  ChangeNamePrompt:
+    - "&a[DiemDanh Editor] Enter the new display name in chat (Color codes & supported)."
+    - "&aExample: &c&lChristmas Celebration"
+    - "&7(Type &ccancel &7to cancel)"
+  ChangeNameSuccess: "&aSuccessfully changed display name to: <name>"
+  CreateSpecialPrompt:
+    - "&a[DiemDanh Editor] Enter format: &e<KeyName> <Day> <Month>"
+    - "&aExample: &eNewYear 1 1"
+    - "&7(Type &ccancel &7to cancel)"
+  CreateSpecialSuccess: "&aSuccessfully created special day: &e<key> &a(Date: <month>/<date>)"
+  CreateSpecialSyntaxError: "&cInvalid syntax! Usage: <KeyName> <Day> <Month>"
+  CreateSpecialNumberError: "&cDay and Month must be integers!"
+  DeleteSpecialSuccess: "&cDeleted special day: &e<key>"
