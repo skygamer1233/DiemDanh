@@ -10,7 +10,8 @@ public class DiemDanhEditorHolder implements InventoryHolder {
         DAYS,
         TICHLUY,
         SPECIAL,
-        COMMAND
+        COMMAND,
+        LORE
     }
 
     private final MenuType menuType;
