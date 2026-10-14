@@ -117,6 +117,13 @@ Icons:
         - "&7Tên hiện tại: <display_name>"
         - ""
         - "&aClick để nhập Tên hiển thị mới vào Chat!"
+    DeleteSpecialDay:
+      ID: "LAVA_BUCKET"
+      Name: "&c&lXóa Ngày Lễ Này"
+      Lore:
+        - "&7Đang chọn ngày: &e<key>"
+        - ""
+        - "&cClick để XÓA vĩnh viễn ngày lễ này!"
     Back:
       ID: "BARRIER"
       Name: "&cQuay Lại"

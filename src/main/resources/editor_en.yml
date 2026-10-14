@@ -117,6 +117,13 @@ Icons:
         - "&7Current Name: <display_name>"
         - ""
         - "&aClick to enter a new display name in Chat!"
+    DeleteSpecialDay:
+      ID: "LAVA_BUCKET"
+      Name: "&c&lDelete This Special Day"
+      Lore:
+        - "&7Selected special day: &e<key>"
+        - ""
+        - "&cClick to PERMANENTLY DELETE this special day!"
     Back:
       ID: "BARRIER"
       Name: "&cBack"
