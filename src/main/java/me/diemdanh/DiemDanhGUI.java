@@ -60,6 +60,9 @@ public class DiemDanhGUI implements Listener {
                 if (today.getMonthValue() == specialDayMonth && specialDayDate >= 1 && specialDayDate <= 31) {
                     String itemKey = getSpecialDayItemKey(playerUUID, specialDayKey);
                     ConfigurationSection itemSection = plugin.getConfig().getConfigurationSection("SpecialDay." + specialDayKey + ".Icon." + itemKey);
+                    if (itemSection == null) {
+                        itemSection = plugin.getConfig().getConfigurationSection("SpecialDay." + specialDayKey + ".Icon.NgayDiemDanh");
+                    }
                     if (itemSection != null) {
                         ItemStack item = createItemFromConfig(itemSection, specialDayDate, playerUUID);
                         gui.setItem(specialDayDate - 1, item);
