@@ -21,6 +21,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class DiemDanhEditor implements Listener {
@@ -70,6 +73,12 @@ public class DiemDanhEditor implements Listener {
             plugin.saveResource("editor.yml", false);
         }
         this.editorConfig = YamlConfiguration.loadConfiguration(file);
+        try (InputStream defStream = plugin.getResource("editor.yml")) {
+            if (defStream != null) {
+                YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(new InputStreamReader(defStream, StandardCharsets.UTF_8));
+                this.editorConfig.setDefaults(defConfig);
+            }
+        } catch (Exception ignored) {}
     }
 
     public FileConfiguration getEditorConfig() {
@@ -316,13 +325,15 @@ public class DiemDanhEditor implements Listener {
         } else if (returnMenu.equals("TICHLUY") && title.startsWith("Tích Lũy ")) {
             gui.setItem(50, createConfigItem("Icons.CommandEditor.SwitchLore", null, null, null));
         } else if (returnMenu.equals("SPECIAL") && title.startsWith("Lễ ")) {
-            String key = title.replace("Lễ ", "");
+            String key = title.replace("Lễ ", "").trim();
             String currentDisplayName = plugin.getConfig().getString("SpecialDay." + key + ".Icon.NgayDiemDanh.Name", "&e" + key);
             Map<String, String> rep = new HashMap<>();
             rep.put("<display_name>", currentDisplayName);
+            rep.put("<key>", key);
 
             gui.setItem(50, createConfigItem("Icons.CommandEditor.ChangeNameTag", rep, null, null));
             gui.setItem(51, createConfigItem("Icons.CommandEditor.SwitchLore", null, null, null));
+            gui.setItem(52, createConfigItem("Icons.CommandEditor.DeleteSpecialDay", rep, null, null));
         }
 
         gui.setItem(53, createConfigItem("Icons.CommandEditor.Back", null, null, null));
@@ -355,6 +366,14 @@ public class DiemDanhEditor implements Listener {
 
         // Slot 49: Nút thêm dòng Lore mới
         gui.setItem(49, createConfigItem("Icons.LoreEditor.AddLine", null, null, null));
+
+        // Slot 52: Nút xóa ngày lễ (nếu đang ở menu Special Day)
+        if (returnMenu.equals("SPECIAL") && title.startsWith("Lễ ")) {
+            String key = title.replace("Lễ ", "").trim();
+            Map<String, String> rep = new HashMap<>();
+            rep.put("<key>", key);
+            gui.setItem(52, createConfigItem("Icons.CommandEditor.DeleteSpecialDay", rep, null, null));
+        }
 
         // Slot 53: Nút quay lại
         gui.setItem(53, createConfigItem("Icons.LoreEditor.Back", null, null, null));
@@ -420,19 +439,21 @@ public class DiemDanhEditor implements Listener {
                     activeSessions.put(player.getUniqueId(), new EditSession(null, EditType.CREATE_SPECIAL_DAY, "SPECIAL", "Ngày Lễ"));
                     sendMessage(player, "CreateSpecialPrompt", null);
                 } else if (slot < 45) {
-                    ItemStack item = event.getCurrentItem();
-                    if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
-                        String rawDisplayName = ChatColor.stripColor(item.getItemMeta().getDisplayName());
-                        String keyName = rawDisplayName.replace("Key: ", "").trim();
-                        if (event.isRightClick()) {
-                            plugin.getConfig().set("SpecialDay." + keyName, null);
-                            plugin.saveConfig();
-                            Map<String, String> rep = new HashMap<>();
-                            rep.put("<key>", keyName);
-                            sendMessage(player, "DeleteSpecialSuccess", rep);
-                            openSpecialDayEditor(player);
-                        } else {
-                            openCommandEditor(player, "SpecialDay." + keyName + ".Reward", "Lễ " + keyName, "SPECIAL");
+                    ConfigurationSection specialSec = plugin.getConfig().getConfigurationSection("SpecialDay");
+                    if (specialSec != null) {
+                        List<String> keys = new ArrayList<>(specialSec.getKeys(false));
+                        if (slot < keys.size()) {
+                            String keyName = keys.get(slot);
+                            if (event.isRightClick()) {
+                                plugin.getConfig().set("SpecialDay." + keyName, null);
+                                plugin.saveConfig();
+                                Map<String, String> rep = new HashMap<>();
+                                rep.put("<key>", keyName);
+                                sendMessage(player, "DeleteSpecialSuccess", rep);
+                                openSpecialDayEditor(player);
+                            } else {
+                                openCommandEditor(player, "SpecialDay." + keyName + ".Reward", "Lễ " + keyName, "SPECIAL");
+                            }
                         }
                     }
                 }
@@ -463,10 +484,18 @@ public class DiemDanhEditor implements Listener {
                     activeSessions.put(player.getUniqueId(), new EditSession(configPath, EditType.ADD_COMMAND, returnMenu, title));
                     sendMessage(player, "AddCommandPrompt", null);
                 } else if (slot == 50 && returnMenu.equals("SPECIAL") && title.startsWith("Lễ ")) {
-                    String key = title.replace("Lễ ", "");
+                    String key = title.replace("Lễ ", "").trim();
                     player.closeInventory();
-                    activeSessions.put(player.getUniqueId(), new EditSession("SpecialDay." + key + ".Icon.NgayDiemDanh.Name", EditType.CHANGE_DISPLAY_NAME, "SPECIAL", title));
+                    activeSessions.put(player.getUniqueId(), new EditSession(configPath, EditType.CHANGE_DISPLAY_NAME, "SPECIAL", title, -1, key));
                     sendMessage(player, "ChangeNamePrompt", null);
+                } else if (slot == 52 && returnMenu.equals("SPECIAL") && title.startsWith("Lễ ")) {
+                    String key = title.replace("Lễ ", "").trim();
+                    plugin.getConfig().set("SpecialDay." + key, null);
+                    plugin.saveConfig();
+                    Map<String, String> rep = new HashMap<>();
+                    rep.put("<key>", key);
+                    sendMessage(player, "DeleteSpecialSuccess", rep);
+                    openSpecialDayEditor(player);
                 } else if (slot < 45) {
                     List<String> cmds = plugin.getConfig().getStringList(configPath);
                     if (slot < cmds.size()) {
@@ -509,6 +538,14 @@ public class DiemDanhEditor implements Listener {
                     player.closeInventory();
                     activeSessions.put(player.getUniqueId(), new EditSession(configPath, EditType.ADD_LORE_LINE, returnMenu, title));
                     sendMessage(player, "AddLorePrompt", null);
+                } else if (slot == 52 && returnMenu.equals("SPECIAL") && title.startsWith("Lễ ")) {
+                    String key = title.replace("Lễ ", "").trim();
+                    plugin.getConfig().set("SpecialDay." + key, null);
+                    plugin.saveConfig();
+                    Map<String, String> rep = new HashMap<>();
+                    rep.put("<key>", key);
+                    sendMessage(player, "DeleteSpecialSuccess", rep);
+                    openSpecialDayEditor(player);
                 } else if (slot < 45) {
                     List<String> lores = getLoreFromConfig(configPath);
                     if (slot < lores.size()) {
@@ -583,12 +620,33 @@ public class DiemDanhEditor implements Listener {
                 }
                 openLoreEditor(player, session.configPath, session.title, session.returnMenu);
             } else if (session.editType == EditType.CHANGE_DISPLAY_NAME) {
-                plugin.getConfig().set(session.configPath, msg);
+                String key = (session.extra != null && !session.extra.isEmpty())
+                        ? session.extra
+                        : session.title.replace("Lễ ", "").trim();
+
+                String namePath = "SpecialDay." + key + ".Icon.NgayDiemDanh.Name";
+                plugin.getConfig().set(namePath, msg);
+
+                // Đồng bộ tên hiển thị sang các icon trạng thái khác của ngày lễ nếu có
+                ConfigurationSection iconSec = plugin.getConfig().getConfigurationSection("SpecialDay." + key + ".Icon");
+                if (iconSec != null) {
+                    for (String iconKey : iconSec.getKeys(false)) {
+                        if (!iconKey.equals("NgayDiemDanh")) {
+                            plugin.getConfig().set("SpecialDay." + key + ".Icon." + iconKey + ".Name", msg);
+                        }
+                    }
+                }
+
                 plugin.saveConfig();
                 Map<String, String> rep = new HashMap<>();
                 rep.put("<name>", msg);
                 sendMessage(player, "ChangeNameSuccess", rep);
-                openCommandEditor(player, session.configPath, session.title, session.returnMenu);
+
+                // Mở lại đúng Command Editor với path lệnh thưởng là SpecialDay.<key>.Reward
+                String rewardPath = (session.configPath != null && session.configPath.endsWith(".Reward"))
+                        ? session.configPath
+                        : "SpecialDay." + key + ".Reward";
+                openCommandEditor(player, rewardPath, session.title, session.returnMenu);
             } else if (session.editType == EditType.CREATE_SPECIAL_DAY) {
                 String[] args = msg.split(" ");
                 if (args.length < 3) {
@@ -606,6 +664,15 @@ public class DiemDanhEditor implements Listener {
                     plugin.getConfig().set(path + ".Require.Month", month);
                     plugin.getConfig().set(path + ".Icon.NgayDiemDanh.ID", "SUNFLOWER");
                     plugin.getConfig().set(path + ".Icon.NgayDiemDanh.Name", "&e" + key);
+                    plugin.getConfig().set(path + ".Icon.DiemDanh.ID", "SUNFLOWER");
+                    plugin.getConfig().set(path + ".Icon.DiemDanh.Name", "&a" + key + " Điểm Danh");
+                    plugin.getConfig().set(path + ".Icon.DiemDanh.Glow", true);
+                    plugin.getConfig().set(path + ".Icon.DaDiemDanh.ID", "SUNFLOWER");
+                    plugin.getConfig().set(path + ".Icon.DaDiemDanh.Name", "&2" + key + " Đã Điểm Danh");
+                    plugin.getConfig().set(path + ".Icon.ChuaDiemDanh.ID", "SUNFLOWER");
+                    plugin.getConfig().set(path + ".Icon.ChuaDiemDanh.Name", "&c" + key + " Chưa Điểm Danh");
+                    plugin.getConfig().set(path + ".Icon.DiemDanhBu.ID", "SUNFLOWER");
+                    plugin.getConfig().set(path + ".Icon.DiemDanhBu.Name", "&b" + key + " Điểm Danh Bù");
                     plugin.getConfig().set(path + ".Reward", new ArrayList<String>());
 
                     plugin.saveConfig();
