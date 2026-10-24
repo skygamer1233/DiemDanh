@@ -60,7 +60,7 @@ public class DiemDanhEditor implements Listener {
         }
     }
 
-    private final Map<UUID, EditSession> activeSessions = new HashMap<>();
+    private final Map<UUID, EditSession> activeSessions = new java.util.concurrent.ConcurrentHashMap<>();
 
     public DiemDanhEditor(DiemDanh plugin) {
         this.plugin = plugin;
@@ -383,7 +383,7 @@ public class DiemDanhEditor implements Listener {
 
     @EventHandler
     public void onInventoryDrag(InventoryDragEvent event) {
-        if (event.getInventory().getHolder() instanceof DiemDanhEditorHolder) {
+        if (InventoryUtil.getHolder(event.getInventory()) instanceof DiemDanhEditorHolder) {
             event.setCancelled(true);
         }
     }
@@ -391,7 +391,7 @@ public class DiemDanhEditor implements Listener {
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player player)) return;
-        if (!(event.getInventory().getHolder() instanceof DiemDanhEditorHolder holder)) return;
+        if (!(InventoryUtil.getHolder(event.getInventory()) instanceof DiemDanhEditorHolder holder)) return;
 
         event.setCancelled(true);
         int slot = event.getSlot();

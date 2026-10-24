@@ -5,6 +5,7 @@ import me.diemdanh.bedrock.DummyBedrockService;
 import me.diemdanh.bedrock.FloodgateBedrockService;
 import me.diemdanh.data.PlayerDataManager;
 import me.diemdanh.hook.DiemDanhExpansion;
+import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -38,6 +39,7 @@ public class DiemDanh extends JavaPlugin implements Listener {
     public String TotalTitle;
     public DiemDanhGUI diemDanhGUI;
     public DiemDanhEditor diemDanhEditor;
+    private DiemDanhCommand diemDanhCommand;
 
     public String guiTitle;
     public FileConfiguration topGuiConfig;
@@ -50,6 +52,8 @@ public class DiemDanh extends JavaPlugin implements Listener {
     public FileConfiguration bedrockFormConfig;
 
     private Map<String, FileConfiguration> languageConfigs;
+    private BaseComponent[] cachedUncheckedJoinComponents;
+    private String cachedCheckedJoinMessage;
 
     @Override
     public void onEnable() {
@@ -81,11 +85,12 @@ public class DiemDanh extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(diemDanhGUI, this);
         getServer().getPluginManager().registerEvents(this, this);
 
-        getCommand("diemdanh").setExecutor(new DiemDanhCommand(this));
+        diemDanhCommand = new DiemDanhCommand(this);
+        getCommand("diemdanh").setExecutor(diemDanhCommand);
         getCommand("diemdanh").setTabCompleter(new TabComplete());
 
         diemDanhTop = new DiemDanhTop(this);
-        getServer().getPluginManager().registerEvents(diemDanhTop.new TopGUIListener(), this);
+        getServer().getPluginManager().registerEvents(diemDanhTop.getTopGUIListener(), this);
 
         diemDanhEditor = new DiemDanhEditor(this);
         getServer().getPluginManager().registerEvents(diemDanhEditor, this);
@@ -170,6 +175,10 @@ public class DiemDanh extends JavaPlugin implements Listener {
 
         loadLanguageFiles();
 
+        if (diemDanhGUI != null) {
+            diemDanhGUI.clearTemplateCache();
+        }
+
         if (diemDanhTop != null) {
             diemDanhTop.refreshCache();
         }
@@ -223,11 +232,54 @@ public class DiemDanh extends JavaPlugin implements Listener {
                 if (file.isFile() && file.getName().startsWith("message_") && file.getName().endsWith(".yml")) {
                     String langCode = file.getName().substring(8, file.getName().length() - 4);
                     FileConfiguration langConfig = YamlConfiguration.loadConfiguration(file);
+
+                    // Đồng bộ các khóa tin nhắn mới từ JAR (ví dụ DaDiemDanhHomNay) mà không làm mất cấu hình cũ
+                    try (InputStream defStream = getResource("language/" + file.getName())) {
+                        if (defStream != null) {
+                            YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(
+                                    new InputStreamReader(defStream, StandardCharsets.UTF_8));
+                            langConfig.setDefaults(defConfig);
+
+                            boolean changed = false;
+                            if (!langConfig.isSet("Message.DaDiemDanhHomNay") && defConfig.isSet("Message.DaDiemDanhHomNay")) {
+                                langConfig.set("Message.DaDiemDanhHomNay", defConfig.getString("Message.DaDiemDanhHomNay"));
+                                changed = true;
+                            }
+                            String currentUnchecked = langConfig.getString("Message.ChuaDiemDanhHomNay", "");
+                            if (currentUnchecked.equals("&cBạn chưa điểm danh ngày hôm nay. &e[Nhấn vào đây]&c để mở bảng điểm danh.")
+                                    || currentUnchecked.equals("&cYou haven't signed in today. &e[Click here]&c to open sign in GUI.")) {
+                                langConfig.set("Message.ChuaDiemDanhHomNay", defConfig.getString("Message.ChuaDiemDanhHomNay"));
+                                langConfig.set("Message.Hover", defConfig.getString("Message.Hover"));
+                                changed = true;
+                            }
+                            if (changed) {
+                                langConfig.save(file);
+                            }
+                        }
+                    } catch (Exception ignored) {}
+
                     languageConfigs.put(langCode, langConfig);
                     getLogger().info("Loaded language file: " + file.getName());
                 }
             }
         }
+
+        buildCachedJoinMessages();
+    }
+
+    private void buildCachedJoinMessages() {
+        String uncheckedStr = getMessage("ChuaDiemDanhHomNay");
+        String hoverStr = getMessage("Hover");
+        this.cachedCheckedJoinMessage = getMessage("DaDiemDanhHomNay");
+
+        BaseComponent[] components = TextComponent.fromLegacyText(uncheckedStr);
+        ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/diemdanh");
+        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(hoverStr));
+        for (BaseComponent comp : components) {
+            comp.setClickEvent(clickEvent);
+            comp.setHoverEvent(hoverEvent);
+        }
+        this.cachedUncheckedJoinComponents = components;
     }
 
     public void reloadLanguageFiles() {
@@ -241,7 +293,7 @@ public class DiemDanh extends JavaPlugin implements Listener {
             diemDanhTop.stopAutoUpdateTask();
         }
         if (playerDataManager != null) {
-            playerDataManager.saveAllSync();
+            playerDataManager.shutdown();
         }
         getLogger().info(ColorUtil.translate("&7--------------------------------------"));
         getLogger().info(ColorUtil.translate("&eDiemDanh Reloaded&a has been disabled"));
@@ -259,16 +311,27 @@ public class DiemDanh extends JavaPlugin implements Listener {
         return topGuiTitle;
     }
 
+    @EventHandler(priority = org.bukkit.event.EventPriority.LOW)
+    public void onPlayerPreLogin(org.bukkit.event.player.AsyncPlayerPreLoginEvent event) {
+        if (event.getLoginResult() != org.bukkit.event.player.AsyncPlayerPreLoginEvent.Result.ALLOWED) return;
+        UUID uuid = event.getUniqueId();
+        if (playerDataManager != null) {
+            playerDataManager.getPlayerData(uuid);
+        }
+    }
+
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         UUID playerUUID = player.getUniqueId();
         LocalDate today = LocalDate.now();
+        boolean dirty = false;
 
         if (!playerDataManager.hasPlayerData(playerUUID)) {
             playerDataManager.initPlayer(playerUUID, player.getName());
-        } else {
+        } else if (!player.getName().equals(playerDataManager.getPlayerName(playerUUID))) {
             playerDataManager.setPlayerName(playerUUID, player.getName());
+            dirty = true;
         }
 
         int lastCheckInMonth = playerDataManager.getLastCheckInMonth(playerUUID);
@@ -281,56 +344,87 @@ public class DiemDanh extends JavaPlugin implements Listener {
             for (int daysRequired : new int[]{7, 14, 21}) {
                 playerDataManager.setTichLuyClaimed(playerUUID, daysRequired, false, 0);
             }
+            dirty = true;
         }
 
-        updateMissedDays(playerUUID);
+        if (updateMissedDays(playerUUID, today)) {
+            dirty = true;
+        }
 
         try {
             LocalDate lastCheckInDate = LocalDate.parse(playerDataManager.getLastCheckIn(playerUUID));
             if (today.getYear() != lastCheckInDate.getYear()) {
                 playerDataManager.resetSpecialDays(playerUUID);
+                dirty = true;
             }
         } catch (Exception ignored) {}
 
         List<Integer> checkedDays = playerDataManager.getCheckedDays(playerUUID);
-        if (!checkedDays.contains(today.getDayOfMonth())) {
-            TextComponent message = new TextComponent(getMessage("ChuaDiemDanhHomNay"));
-            message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/diemdanh"));
-            message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(getMessage("Hover")).create()));
-            player.spigot().sendMessage(message);
+        String specialKey = (diemDanhGUI != null) ? diemDanhGUI.getSpecialDayKey(today, today.getDayOfMonth()) : null;
+        boolean hasCheckedToday = checkedDays.contains(today.getDayOfMonth())
+                || (specialKey != null && playerDataManager.isSpecialDayChecked(playerUUID, specialKey));
+
+        if (!hasCheckedToday) {
+            if (cachedUncheckedJoinComponents != null) {
+                player.spigot().sendMessage(cachedUncheckedJoinComponents);
+            } else {
+                TextComponent message = new TextComponent(getMessage("ChuaDiemDanhHomNay"));
+                message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/diemdanh"));
+                message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(getMessage("Hover")).create()));
+                player.spigot().sendMessage(message);
+            }
+        } else {
+            player.sendMessage(cachedCheckedJoinMessage != null ? cachedCheckedJoinMessage : getMessage("DaDiemDanhHomNay"));
         }
 
-        playerDataManager.savePlayerDataAsync(playerUUID);
+        if (dirty) {
+            playerDataManager.savePlayerDataAsync(playerUUID);
+        }
     }
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
+        UUID uuid = event.getPlayer().getUniqueId();
         if (playerDataManager != null) {
-            playerDataManager.unloadPlayer(event.getPlayer().getUniqueId());
+            playerDataManager.unloadPlayer(uuid);
+        }
+        if (diemDanhGUI != null) {
+            diemDanhGUI.clearCooldown(uuid);
+        }
+        if (diemDanhTop != null) {
+            diemDanhTop.clearCooldown(uuid);
+        }
+        if (bedrockService != null) {
+            bedrockService.clearCooldown(uuid);
+        }
+        if (diemDanhCommand != null) {
+            diemDanhCommand.clearCooldown(uuid);
         }
     }
 
-    private void updateMissedDays(UUID playerUUID) {
-        LocalDate today = LocalDate.now();
-        int currentMonth = today.getMonthValue();
-        int lastCheckInMonth = playerDataManager.getLastCheckInMonth(playerUUID);
-
-        if (currentMonth != lastCheckInMonth) {
-            playerDataManager.setCheckedDays(playerUUID, new ArrayList<>());
-            playerDataManager.setDaysCheckedIn(playerUUID, 0);
-            playerDataManager.setLastCheckInMonth(playerUUID, currentMonth);
-        }
-
-        List<Integer> missedDays = new ArrayList<>(playerDataManager.getMissedDays(playerUUID));
+    private boolean updateMissedDays(UUID playerUUID, LocalDate today) {
+        List<Integer> currentMissed = playerDataManager.getMissedDays(playerUUID);
         List<Integer> checkedDays = playerDataManager.getCheckedDays(playerUUID);
 
-        for (int day = 1; day < today.getDayOfMonth(); day++) {
-            if (!checkedDays.contains(day) && !missedDays.contains(day)) {
-                missedDays.add(day);
+        Set<Integer> checkedSet = new HashSet<>(checkedDays);
+        Set<Integer> missedSet = new HashSet<>(currentMissed);
+        List<Integer> updatedMissed = null;
+
+        int todayDay = today.getDayOfMonth();
+        for (int day = 1; day < todayDay; day++) {
+            if (!checkedSet.contains(day) && !missedSet.contains(day)) {
+                if (updatedMissed == null) {
+                    updatedMissed = new ArrayList<>(currentMissed);
+                }
+                updatedMissed.add(day);
             }
         }
 
-        playerDataManager.setMissedDays(playerUUID, missedDays);
+        if (updatedMissed != null) {
+            playerDataManager.setMissedDays(playerUUID, updatedMissed);
+            return true;
+        }
+        return false;
     }
 
     public void savePlayerData() {

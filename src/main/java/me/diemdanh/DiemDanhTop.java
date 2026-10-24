@@ -87,14 +87,15 @@ public class DiemDanhTop {
 
     private void computeTopCache() {
         int currentMonth = LocalDate.now().getMonthValue();
-        Set<UUID> allUuids = plugin.getPlayerDataManager().getAllTrackedUUIDs();
+        Map<UUID, me.diemdanh.data.PlayerDataManager.PlayerTopRecord> index = plugin.getPlayerDataManager().getTopIndex();
 
-        List<TopEntry> allEntries = new ArrayList<>();
-        for (UUID uuid : allUuids) {
-            int lastCheckInMonth = plugin.getPlayerDataManager().getLastCheckInMonth(uuid);
-            int monthDays = (lastCheckInMonth == currentMonth) ? plugin.getPlayerDataManager().getDaysCheckedIn(uuid) : 0;
-            int totalDays = plugin.getPlayerDataManager().getTotalDays(uuid);
-            String name = plugin.getPlayerDataManager().getPlayerName(uuid);
+        List<TopEntry> allEntries = new ArrayList<>(index.size());
+        for (Map.Entry<UUID, me.diemdanh.data.PlayerDataManager.PlayerTopRecord> entry : index.entrySet()) {
+            UUID uuid = entry.getKey();
+            me.diemdanh.data.PlayerDataManager.PlayerTopRecord rec = entry.getValue();
+            int monthDays = (rec.getLastCheckInMonth() == currentMonth) ? rec.getDaysCheckedIn() : 0;
+            int totalDays = rec.getTotalDays();
+            String name = rec.getName();
 
             allEntries.add(new TopEntry(uuid, name, monthDays, totalDays));
         }
@@ -243,13 +244,21 @@ public class DiemDanhTop {
         return item;
     }
 
+    private final TopGUIListener topGUIListener = new TopGUIListener();
+    public TopGUIListener getTopGUIListener() { return topGUIListener; }
+    public void clearCooldown(UUID uuid) { topGUIListener.clearCooldown(uuid); }
+
     public class TopGUIListener implements Listener {
-        private final Map<UUID, Long> clickCooldowns = new HashMap<>();
+        private final Map<UUID, Long> clickCooldowns = new java.util.concurrent.ConcurrentHashMap<>();
+
+        public void clearCooldown(UUID uuid) {
+            clickCooldowns.remove(uuid);
+        }
 
         @EventHandler
         public void onInventoryClick(InventoryClickEvent event) {
             if (!(event.getWhoClicked() instanceof Player player)) return;
-            if (!(event.getInventory().getHolder() instanceof DiemDanhTopHolder topHolder)) return;
+            if (!(InventoryUtil.getHolder(event.getInventory()) instanceof DiemDanhTopHolder topHolder)) return;
 
             event.setCancelled(true);
             if (event.getCurrentItem() == null) return;
@@ -273,7 +282,7 @@ public class DiemDanhTop {
 
         @EventHandler
         public void onInventoryDrag(InventoryDragEvent event) {
-            if (event.getInventory().getHolder() instanceof DiemDanhTopHolder) {
+            if (InventoryUtil.getHolder(event.getInventory()) instanceof DiemDanhTopHolder) {
                 event.setCancelled(true);
             }
         }

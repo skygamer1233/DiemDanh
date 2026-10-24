@@ -10,9 +10,27 @@ import org.jetbrains.annotations.NotNull;
 public class DiemDanhCommand implements CommandExecutor {
 
     private final DiemDanh plugin;
+    private final java.util.Map<java.util.UUID, Long> commandCooldowns = new java.util.concurrent.ConcurrentHashMap<>();
 
     public DiemDanhCommand(DiemDanh plugin) {
         this.plugin = plugin;
+    }
+
+    public void clearCooldown(java.util.UUID uuid) {
+        if (uuid != null) {
+            commandCooldowns.remove(uuid);
+        }
+    }
+
+    private boolean checkCooldown(Player player) {
+        if (player == null) return false;
+        long now = System.currentTimeMillis();
+        Long last = commandCooldowns.get(player.getUniqueId());
+        if (last != null && now - last < 400) {
+            return true;
+        }
+        commandCooldowns.put(player.getUniqueId(), now);
+        return false;
     }
 
     @Override
@@ -83,6 +101,7 @@ public class DiemDanhCommand implements CommandExecutor {
                 sender.sendMessage(plugin.getMessage("NotPlayer"));
                 return true;
             }
+            if (checkCooldown(player)) return true;
             boolean forceChest = (args.length >= 2 && args[1].equalsIgnoreCase("chest"));
             if (!forceChest && plugin.getBedrockService() != null && plugin.getBedrockService().isBedrockPlayer(player)) {
                 plugin.getBedrockService().openLeaderboardMenu(player);
@@ -98,6 +117,7 @@ public class DiemDanhCommand implements CommandExecutor {
                 sender.sendMessage(plugin.getMessage("NotPlayer"));
                 return true;
             }
+            if (checkCooldown(player)) return true;
             plugin.getDiemDanhGUI().openDiemDanhGUI(player);
             return true;
         }
@@ -108,6 +128,7 @@ public class DiemDanhCommand implements CommandExecutor {
                 sender.sendMessage(plugin.getMessage("NotPlayer"));
                 return true;
             }
+            if (checkCooldown(player)) return true;
             if (plugin.getBedrockService() != null && plugin.getBedrockService().isBedrockPlayer(player)) {
                 plugin.getBedrockService().openMainMenu(player);
             } else {
@@ -122,6 +143,7 @@ public class DiemDanhCommand implements CommandExecutor {
                 sender.sendMessage(plugin.getMessage("NotPlayer"));
                 return true;
             }
+            if (checkCooldown(player)) return true;
             if (plugin.getBedrockService() != null && plugin.getBedrockService().isBedrockPlayer(player)) {
                 plugin.getBedrockService().openMainMenu(player);
             } else {
