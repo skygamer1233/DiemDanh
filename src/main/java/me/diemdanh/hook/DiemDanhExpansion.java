@@ -86,27 +86,54 @@ public class DiemDanhExpansion extends PlaceholderExpansion {
         UUID uuid = offlinePlayer.getUniqueId();
         LocalDate today = LocalDate.now();
 
-        if (params.equalsIgnoreCase("days") || params.equalsIgnoreCase("month_days")) {
-            int lastCheckInMonth = plugin.getPlayerDataManager().getLastCheckInMonth(uuid);
-            return String.valueOf(lastCheckInMonth == today.getMonthValue() ? plugin.getPlayerDataManager().getDaysCheckedIn(uuid) : 0);
-        }
+        // Nếu người chơi đang có trong Cache (online hoặc vừa đăng nhập)
+        if (plugin.getPlayerDataManager().isCached(uuid)) {
+            if (params.equalsIgnoreCase("days") || params.equalsIgnoreCase("month_days")) {
+                int lastCheckInMonth = plugin.getPlayerDataManager().getLastCheckInMonth(uuid);
+                return String.valueOf(lastCheckInMonth == today.getMonthValue() ? plugin.getPlayerDataManager().getDaysCheckedIn(uuid) : 0);
+            }
 
-        if (params.equalsIgnoreCase("totaldays") || params.equalsIgnoreCase("total_days")) {
-            return String.valueOf(plugin.getPlayerDataManager().getTotalDays(uuid));
-        }
+            if (params.equalsIgnoreCase("totaldays") || params.equalsIgnoreCase("total_days")) {
+                return String.valueOf(plugin.getPlayerDataManager().getTotalDays(uuid));
+            }
 
-        if (params.equalsIgnoreCase("tickets") || params.equalsIgnoreCase("ticket")) {
-            return String.valueOf(plugin.getPlayerDataManager().getTickets(uuid));
-        }
+            if (params.equalsIgnoreCase("tickets") || params.equalsIgnoreCase("ticket")) {
+                return String.valueOf(plugin.getPlayerDataManager().getTickets(uuid));
+            }
 
-        if (params.equalsIgnoreCase("is_checked_today")) {
-            List<Integer> checkedDays = plugin.getPlayerDataManager().getCheckedDays(uuid);
-            return checkedDays.contains(today.getDayOfMonth()) ? "true" : "false";
-        }
+            if (params.equalsIgnoreCase("is_checked_today")) {
+                List<Integer> checkedDays = plugin.getPlayerDataManager().getCheckedDays(uuid);
+                return checkedDays.contains(today.getDayOfMonth()) ? "true" : "false";
+            }
 
-        if (params.equalsIgnoreCase("checked_today")) {
-            List<Integer> checkedDays = plugin.getPlayerDataManager().getCheckedDays(uuid);
-            return checkedDays.contains(today.getDayOfMonth()) ? "&aĐã điểm danh" : "&cChưa điểm danh";
+            if (params.equalsIgnoreCase("checked_today")) {
+                List<Integer> checkedDays = plugin.getPlayerDataManager().getCheckedDays(uuid);
+                return checkedDays.contains(today.getDayOfMonth()) ? "&aĐã điểm danh" : "&cChưa điểm danh";
+            }
+        } else {
+            // Người chơi offline: Chỉ đọc từ Top Record trong RAM, tuyệt đối KHÔNG đọc đĩa hay nạp config rỗng
+            me.diemdanh.data.PlayerDataManager.PlayerTopRecord rec = plugin.getPlayerDataManager().getTopRecord(uuid);
+            if (params.equalsIgnoreCase("days") || params.equalsIgnoreCase("month_days")) {
+                if (rec == null) return "0";
+                return String.valueOf(rec.getLastCheckInMonth() == today.getMonthValue() ? rec.getDaysCheckedIn() : 0);
+            }
+
+            if (params.equalsIgnoreCase("totaldays") || params.equalsIgnoreCase("total_days")) {
+                if (rec == null) return "0";
+                return String.valueOf(rec.getTotalDays());
+            }
+
+            if (params.equalsIgnoreCase("tickets") || params.equalsIgnoreCase("ticket")) {
+                return "0";
+            }
+
+            if (params.equalsIgnoreCase("is_checked_today")) {
+                return "false";
+            }
+
+            if (params.equalsIgnoreCase("checked_today")) {
+                return "&cChưa điểm danh";
+            }
         }
 
         return null;
