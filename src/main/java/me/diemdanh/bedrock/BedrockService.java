@@ -9,4 +9,5 @@ public interface BedrockService {
     void openMilestoneMenu(Player player);
     void openLeaderboardMenu(Player player);
     void openCalendarDetailMenu(Player player);
+    default void clearCooldown(java.util.UUID uuid) {}
 }

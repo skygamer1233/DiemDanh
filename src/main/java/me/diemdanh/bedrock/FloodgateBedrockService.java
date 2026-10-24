@@ -52,6 +52,13 @@ public class FloodgateBedrockService implements BedrockService {
         }
     }
 
+    @Override
+    public void clearCooldown(UUID uuid) {
+        if (uuid != null) {
+            clickCooldowns.remove(uuid);
+        }
+    }
+
     private boolean checkCooldown(UUID uuid) {
         long now = System.currentTimeMillis();
         long cooldownMs = getFormConfig().getLong("Settings.ClickCooldownMillis", 350L);
